@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MegaCable API - Cliente de Prueba</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: linear-gradient(135deg, #007cba, #005a87);
+      color: white;
+      border-radius: 8px;
+    }
+
+    .section {
+      background: #f9f9f9;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 8px;
+      border-left: 4px solid #007cba;
+    }
+
+    .result {
+      background: #e8f5e8;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #4caf50;
+    }
+
+    .error {
+      background: #ffe8e8;
+      border: 1px solid #f44336;
+    }
+
+    button {
+      background: #007cba;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #005a87;
+    }
+
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    input {
+      padding: 10px;
+      margin: 5px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    input:focus {
+      border-color: #007cba;
+      outline: none;
+    }
+
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    pre {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 4px;
+      border: 1px solid #e9ecef;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🚀 MegaCable API</h1>
+      <p>Cliente de Prueba para Proyecciones de Contratos</p>
+    </div>
+
+    <div id="status" class="status info">
+      🔄 Verificando conexión con la API...
+    </div>
+
+    <div class="section">
+      <h2>🔍 Validar Contrato</h2>
+      <input type="text" id="contratoValidar" placeholder="Ej: CTR-2025-001" value="CTR-2025-001">
+      <button onclick="validarContrato()" id="btnValidar">Validar Contrato</button>
+    </div>
+
+    <div class="section">
+      <h2>📊 Generar Proyección de Contrato</h2>
+      <input type="text" id="contratoProyeccion" placeholder="Ej: CTR-2025-001" value="CTR-2025-001">
+      <input type="number" id="mesesFuturos" placeholder="Meses" value="6" min="1" max="24">
+      <button onclick="generarProyeccion()" id="btnProyeccion">Generar Proyección</button>
+    </div>
+
+    <div class="section">
+      <h2>📈 Proyecciones Múltiples</h2>
+      <p>Procesar múltiples contratos de una vez:</p>
+      <button onclick="proyeccionesMultiples()" id="btnMultiple">Procesar Múltiples Contratos</button>
+    </div>
+
+    <div class="section">
+      <h2>🧪 Contratos de Prueba Disponibles</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+        <button onclick="probarContrato('CTR-2025-001')">CTR-2025-001</button>
+        <button onclick="probarContrato('CTR-2025-002')">CTR-2025-002</button>
+        <button onclick="probarContrato('CTR-2025-003')">CTR-2025-003</button>
+        <button onclick="probarContrato('CTR-2024-001')">CTR-2024-001</button>
+        <button onclick="probarContrato('CTR-2024-002')">CTR-2024-002</button>
+        <button onclick="probarContrato('CON-2025-001')">CON-2025-001</button>
+      </div>
+      <button onclick="probarContrato('INVALIDO-123')" style="background: #f44336;">Probar Contrato Inválido</button>
+    </div>
+
+    <div id="resultado" class="result" style="display:none;">
+      <h3>📋 Resultado:</h3>
+      <pre id="resultadoTexto"></pre>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:5011/api/Proyeccion';
+
+    // Verificar conexión con la API al cargar la página
+    window.onload = async function () {
+      await verificarConexion();
+    };
+
+    // Verificar que la API esté ejecutándose
+    async function verificarConexion() {
+      const statusDiv = document.getElementById('status');
+      try {
+        const response = await fetch(API_BASE + '/contrato/CTR-2025-001/validar');
+        if (response.ok) {
+          statusDiv.className = 'status success';
+          statusDiv.innerHTML = '✅ Conexión exitosa con MegaCable API';
+        } else {
+          throw new Error('API respondió con error');
+        }
+      } catch (error) {
+        statusDiv.className = 'status error';
+        statusDiv.innerHTML = '❌ No se puede conectar con la API. Asegúrate de que esté ejecutándose en http://localhost:5011';
+      }
+    }
+
+    // Función para mostrar resultados
+    function mostrarResultado(data, esError = false) {
+      const resultDiv = document.getElementById('resultado');
+      const resultText = document.getElementById('resultadoTexto');
+
+      resultDiv.style.display = 'block';
+      resultDiv.className = esError ? 'result error' : 'result';
+      resultText.textContent = JSON.stringify(data, null, 2);
+
+      // Scroll suave hacia el resultado
+      resultDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Función para deshabilitar/habilitar botones
+    function setLoading(isLoading) {
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(btn => btn.disabled = isLoading);
+    }
+
+    // Validar contrato
+    async function validarContrato() {
+      const contrato = document.getElementById('contratoValidar').value.trim();
+
+      if (!contrato) {
+        alert('Por favor ingresa un número de contrato');
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const response = await fetch(`${API_BASE}/contrato/${contrato}/validar`);
+        const data = await response.json();
+
+        if (response.ok) {
+          mostrarResultado({
+            ...data,
+            timestamp: new Date().toLocaleString(),
+            endpoint: 'Validar Contrato'
+          });
+        } else {
+          mostrarResultado({ error: data.mensaje || 'Error al validar contrato', response: data }, true);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarResultado({ error: 'Error de conexión al validar contrato', details: error.message }, true);
+      }
+      setLoading(false);
+    }
+
+    // Generar proyección
+    async function generarProyeccion() {
+      const contrato = document.getElementById('contratoProyeccion').value.trim();
+      const meses = document.getElementById('mesesFuturos').value;
+
+      if (!contrato) {
+        alert('Por favor ingresa un número de contrato');
+        return;
+      }
+
+      if (meses < 1 || meses > 24) {
+        alert('Los meses deben estar entre 1 y 24');
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const response = await fetch(`${API_BASE}/contrato/${contrato}?mesesFuturos=${meses}`);
+        const data = await response.json();
+
+        if (response.ok) {
+          mostrarResultado({
+            ...data,
+            timestamp: new Date().toLocaleString(),
+            endpoint: 'Generar Proyección'
+          });
+        } else {
+          mostrarResultado({ error: data.mensaje || 'Error al generar proyección', response: data }, true);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarResultado({ error: 'Error de conexión al generar proyección', details: error.message }, true);
+      }
+      setLoading(false);
+    }
+
+    // Proyecciones múltiples
+    async function proyeccionesMultiples() {
+      const solicitudes = [
+        { numeroContrato: "CTR-2025-001", mesesFuturos: 3 },
+        { numeroContrato: "CTR-2025-002", mesesFuturos: 6 },
+        { numeroContrato: "CON-2025-001", mesesFuturos: 12 }
+      ];
+
+      setLoading(true);
+      try {
+        const response = await fetch(`${API_BASE}/contratos/multiple`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(solicitudes)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          mostrarResultado({
+            solicitudes_procesadas: solicitudes.length,
+            proyecciones: data,
+            timestamp: new Date().toLocaleString(),
+            endpoint: 'Proyecciones Múltiples'
+          });
+        } else {
+          mostrarResultado({ error: data.mensaje || 'Error al procesar múltiples proyecciones', response: data }, true);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarResultado({ error: 'Error de conexión al procesar múltiples proyecciones', details: error.message }, true);
+      }
+      setLoading(false);
+    }
+
+    // Probar contrato específico
+    async function probarContrato(numeroContrato) {
+      document.getElementById('contratoValidar').value = numeroContrato;
+      document.getElementById('contratoProyeccion').value = numeroContrato;
+      await validarContrato();
+    }
+  </script>
+</body>
+
+</html>
