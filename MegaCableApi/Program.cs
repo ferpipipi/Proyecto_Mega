@@ -14,18 +14,6 @@ public class Program
         builder.Services.AddRazorPages();
         builder.Services.AddControllers();
 
-        // Configure CORS para permitir peticiones desde el frontend
-        builder.Services.AddCors(options =>
-        {
-            options.AddPolicy("AllowFrontend", builder =>
-            {
-                builder
-                    .AllowAnyOrigin()  // En producción, especifica dominios específicos
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
-            });
-        });
-
         // Configure database settings
         builder.Services.Configure<DatabaseConfig>(
             builder.Configuration.GetSection("DatabaseConfig"));
@@ -61,6 +49,17 @@ public class Program
                 c.IncludeXmlComments(xmlPath);
             }
         });
+        // Configure CORS para permitir peticiones desde el frontend
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("PermitirAngular", builder =>
+            {
+                    policy.WithOrigins("http://localhost:4200") // Cambia esto por la URL de tu frontend
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
+        
 
         var app = builder.Build();
 
@@ -82,10 +81,8 @@ public class Program
         app.UseStaticFiles();
 
         // Usar CORS
-        app.UseCors("AllowFrontend");
-
         app.UseRouting();
-
+        app.UseCors("PermitirAngular");
         app.UseAuthorization();
 
         app.MapRazorPages();
