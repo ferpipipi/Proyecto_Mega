@@ -12,5 +12,9 @@ export class DeudaService {
     obtenerSuscriptores(): Observable<string[]> {
         return this.http.get<string[]>(`${this.apiUrl}/Suscriptores`);
     }
+
+    calcularDeuda(suscriptorId: number): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}/calcular/${suscriptorId}`);
+    }
 }
 

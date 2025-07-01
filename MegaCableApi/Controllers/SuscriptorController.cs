@@ -8,35 +8,37 @@ using Microsoft.Data.SqlClient; // Paquete más moderno y mantenido
 namespace MegaCableApi.Controllers {
     [ApiController]
     [Route("api/[controller]")] // La ruta será /api/suscriptores
-    public class SuscriptoresController : ControllerBase {
+    public class SuscriptoresController : ControllerBase
+    {
         private readonly IConfiguration _config;
 
-        public SuscriptoresController(IConfiguration config) {
+        public SuscriptoresController(IConfiguration config)
+        {
             _config = config;
         }
 
         // GET: api/suscriptores
         [HttpGet]
         public IActionResult GetAllSuscriptores()
-{
-    var suscriptores = new List<SuscriptoresDto>();
-    string connectionString = _config.GetConnectionString("DefaultConnection") 
-        ?? throw new InvalidOperationException("La cadena de conexión no está configurada.");
+        {
+            var suscriptores = new List<SuscriptoresDto>();
+            string connectionString = _config.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("La cadena de conexión no está configurada.");
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 // Consulta para obtener todos los registros
                 string query = @"SELECT 
-                        id,
-                        nombre,
-                        alias,
-                        correo,
-                        celular,
-                        ciudad_id,
-                        colonia_id,
-                        estados_abreviatura,
-                        tipo_suscriptor_codigo
-                    FROM suscriptores";
+                                id,
+                                nombre,
+                                alias,
+                                correo,
+                                celular,
+                                ciudad_id,
+                                colonia_id,
+                                estados_abreviatura,
+                                tipo_suscriptor_codigo
+                            FROM suscriptores";
 
                 SqlCommand command = new SqlCommand(query, connection);
                 connection.Open();
@@ -56,7 +58,7 @@ namespace MegaCableApi.Controllers {
                             colonia_id = reader["colonia_id"] as int?,
                             estados_abreviatura = reader["estados_abreviatura"]?.ToString(),
                             tipo_suscriptor_codigo = reader["tipo_suscriptor_codigo"]?.ToString()
-                            
+
                         });
                     }
                 }
@@ -71,10 +73,11 @@ namespace MegaCableApi.Controllers {
 
         // POST: api/suscriptores
         [HttpPost]
-        public IActionResult Post([FromBody] SuscriptoresDto suscriptorDto) {
-            string connectionString = _config.GetConnectionString("DefaultConnection") 
+        public IActionResult Post([FromBody] SuscriptoresDto suscriptorDto)
+        {
+            string connectionString = _config.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("La cadena de conexión no está configurada.");
-    
+
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 string query = "INSERT INTO suscriptores (nombre, correo, ...) VALUES (@Nombre, @Correo, ...)";
@@ -87,7 +90,7 @@ namespace MegaCableApi.Controllers {
                 command.Parameters.AddWithValue("@ColoniaId", suscriptorDto.colonia_id ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@EstadosAbreviatura", suscriptorDto.estados_abreviatura ?? (object)DBNull.Value);
                 command.Parameters.AddWithValue("@TipoSuscriptorCodigo", suscriptorDto.tipo_suscriptor_codigo ?? (object)DBNull.Value);
-            
+
 
                 connection.Open();
                 command.ExecuteNonQuery();
@@ -95,5 +98,6 @@ namespace MegaCableApi.Controllers {
 
             return Ok(new { success = true, message = "Suscriptor creado correctamente" });
         }
+        
     }
 }

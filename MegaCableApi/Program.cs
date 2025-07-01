@@ -24,6 +24,7 @@ public class Program
         builder.Services.AddScoped<IProyeccionContratoService, ProyeccionContratoServiceMock>();
         // Para usar el servicio real con base de datos, descomenta la siguiente línea:
         // builder.Services.AddScoped<IProyeccionContratoService, ProyeccionContratoService>();
+        builder.Services.AddScoped<IDeudaService, DeudaService>();
 
         // Add API explorer and Swagger services
         builder.Services.AddEndpointsApiExplorer();
