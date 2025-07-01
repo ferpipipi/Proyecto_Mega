@@ -1,0 +1,69 @@
+<div class="contrato-busqueda-container">
+  <div class="search-section">
+    <h2>Búsqueda de Contratos</h2>
+
+    <div class="search-form">
+      <div class="input-group">
+        <input type="text" [(ngModel)]="searchTerm" placeholder="Ingrese número de contrato o cliente"
+          class="form-control" (keyup.enter)="buscarContratos()">
+        <button type="button" class="btn btn-primary" (click)="buscarContratos()" [disabled]="loading">
+          <span *ngIf="loading" class="spinner"></span>
+          {{ loading ? 'Buscando...' : 'Buscar' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="limpiar()">
+          Limpiar
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="error" class="alert alert-danger">
+      {{ error }}
+    </div>
+  </div>
+
+  <div class="results-section" *ngIf="contratos.length > 0">
+    <h3>Resultados ({{ contratos.length }})</h3>
+
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Número de Contrato</th>
+            <th>Cliente</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <th>Estado</th>
+            <th>Monto Total</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let contrato of contratos">
+            <td>{{ contrato.numeroContrato }}</td>
+            <td>{{ contrato.cliente }}</td>
+            <td>{{ contrato.fechaInicio | dateFormat }}</td>
+            <td>{{ contrato.fechaFin | dateFormat }}</td>
+            <td>
+              <span class="badge" [ngClass]="'badge-' + contrato.estado.toLowerCase()">
+                {{ contrato.estado }}
+              </span>
+            </td>
+            <td>{{ contrato.montoTotal | currency }}</td>
+            <td>
+              <button type="button" class="btn btn-sm btn-outline-primary"
+                (click)="validarContrato(contrato.numeroContrato)">
+                Validar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div *ngIf="contratos.length === 0 && !loading && searchTerm" class="no-results">
+    <div class="alert alert-info">
+      No se encontraron contratos para la búsqueda "{{ searchTerm }}"
+    </div>
+  </div>
+</div>

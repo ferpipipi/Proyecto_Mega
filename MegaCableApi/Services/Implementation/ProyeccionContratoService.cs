@@ -58,16 +58,16 @@ public class ProyeccionContratoService : IProyeccionContratoService
       {
         contadorMeses++;
         _logger.LogInformation("Procesando mes {Contador}: {Mes}", contadorMeses, reader["MES"]);
-        
+
         try
         {
           var proyeccionMensual = new ProyeccionMensualDto
           {
             MesNombre = reader["MES"].ToString() ?? "",
-            SubtotalServicios = Convert.ToDecimal(reader["PRECIO BASE CONTRATO"]),
-            DescuentosPromociones = Convert.ToDecimal(reader["DESCUENTOS PROMOCIONES"]),
+            SubtotalServicios = ParseDecimalFromCurrency(reader["PRECIO BASE CONTRATO"].ToString()),
+            DescuentosPromociones = ParseDecimalFromCurrency(reader["DESCUENTOS PROMOCIONES"].ToString()),
             Impuestos = 0, // Los impuestos están incluidos en el precio base
-            TotalProyectado = Convert.ToDecimal(reader["TOTAL A PAGAR"]),
+            TotalProyectado = ParseDecimalFromCurrency(reader["TOTAL A PAGAR"].ToString()),
             PromocionesActivas = reader["PROMOCIONES ACTIVAS"].ToString() ?? "",
             PromocionesVencen = reader["PROMOCIONES QUE VENCEN"].ToString() ?? "",
             Notas = reader["NOTAS"].ToString() ?? ""
@@ -101,11 +101,11 @@ public class ProyeccionContratoService : IProyeccionContratoService
             proyeccion.ResumenEjecutivo = new ResumenEjecutivoContratoDto
             {
               MesesProyectados = Convert.ToInt32(reader["meses_proyectados"]),
-              PagoMinimo = Convert.ToDecimal(reader["pago_minimo_proyectado"]),
-              PagoMaximo = Convert.ToDecimal(reader["pago_maximo_proyectado"]),
-              PagoPromedio = Convert.ToDecimal(reader["pago_promedio"]),
-              TotalPeriodo = Convert.ToDecimal(reader["total_periodo_completo"]),
-              AhorrosTotales = Convert.ToDecimal(reader["ahorros_totales_promociones"])
+              PagoMinimo = ParseDecimalFromCurrency(reader["pago_minimo_proyectado"].ToString()),
+              PagoMaximo = ParseDecimalFromCurrency(reader["pago_maximo_proyectado"].ToString()),
+              PagoPromedio = ParseDecimalFromCurrency(reader["pago_promedio"].ToString()),
+              TotalPeriodo = ParseDecimalFromCurrency(reader["total_periodo_completo"].ToString()),
+              AhorrosTotales = ParseDecimalFromCurrency(reader["ahorros_totales_promociones"].ToString())
             };
             _logger.LogInformation("Resumen ejecutivo procesado exitosamente");
           }
@@ -233,6 +233,30 @@ public class ProyeccionContratoService : IProyeccionContratoService
     catch
     {
       return DateTime.Now;
+    }
+  }
+
+  /// <summary>
+  /// Parsea valores monetarios que vienen como "$123.45" a decimal
+  /// </summary>
+  private decimal ParseDecimalFromCurrency(string? currencyValue)
+  {
+    try
+    {
+      if (string.IsNullOrEmpty(currencyValue))
+        return 0;
+
+      // Remover el símbolo $ y espacios
+      var cleanValue = currencyValue.Replace("$", "").Trim();
+
+      if (decimal.TryParse(cleanValue, out decimal result))
+        return result;
+
+      return 0;
+    }
+    catch
+    {
+      return 0;
     }
   }
 }
