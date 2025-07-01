@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // Para ngModel
+import { FormsModule } from '@angular/forms';
 import { DeudaService } from '../../services/deuda.service';
-
 import { OnInit } from '@angular/core';
 
 @Component({
@@ -16,6 +15,9 @@ import { OnInit } from '@angular/core';
 export class DeudaComponent implements OnInit {
   suscriptores: any[] = [];  
   suscriptorSeleccionadoId: number | null = null;
+  deuda: any = null;
+  cargando: boolean = false;
+  error: string | null = null;
 
   constructor(private deudaService: DeudaService) {}
 
@@ -23,23 +25,35 @@ export class DeudaComponent implements OnInit {
     this.cargarSuscriptores();
   }
 
-
   cargarSuscriptores() {
     this.deudaService.obtenerSuscriptores().subscribe({
       next: (data: any) => {
-        console.log('Respuesta de la API:', data);
-        this.suscriptores = data.data;  // guardamos todo el array de objetos
+        this.suscriptores = data.data;
       },
       error: (error) => {
         console.error('Error al obtener suscriptores', error);
+        this.error = 'Error al cargar suscriptores';
       }
     });
   }
 
   consultarDeuda() {
-    const suscriptor = this.suscriptores.find(s => s.id === this.suscriptorSeleccionadoId);
-    console.log('Consultando deuda para:', suscriptor);
-    // Aquí puedes acceder a suscriptor.nombre, suscriptor.alias, etc.
+    if (!this.suscriptorSeleccionadoId) return;
+    
+    this.cargando = true;
+    this.error = null;
+    this.deuda = null;
+    
+    this.deudaService.calcularDeuda(this.suscriptorSeleccionadoId).subscribe({
+      next: (data: any) => {
+        this.deuda = data;
+        this.cargando = false;
+      },
+      error: (error) => {
+        console.error('Error al calcular deuda', error);
+        this.error = 'Error al calcular la deuda';
+        this.cargando = false;
+      }
+    });
   }
-
 }
