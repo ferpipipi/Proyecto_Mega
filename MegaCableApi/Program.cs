@@ -32,10 +32,10 @@ public class Program
 
         // Register application services
         builder.Services.AddScoped<IProyeccionService, ProyeccionService>();
-        // Usar servicio simulado temporalmente hasta configurar la base de datos real
-        builder.Services.AddScoped<IProyeccionContratoService, ProyeccionContratoServiceMock>();
-        // Para usar el servicio real con base de datos, descomenta la siguiente línea:
-        // builder.Services.AddScoped<IProyeccionContratoService, ProyeccionContratoService>();
+        // Usar servicio real con base de datos
+        builder.Services.AddScoped<IProyeccionContratoService, ProyeccionContratoService>();
+        // Para usar el servicio simulado en pruebas, descomenta la siguiente línea:
+        // builder.Services.AddScoped<IProyeccionContratoService, ProyeccionContratoServiceMock>();
 
         // Add API explorer and Swagger services
         builder.Services.AddEndpointsApiExplorer();
