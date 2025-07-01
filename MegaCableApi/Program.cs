@@ -34,6 +34,8 @@ public class Program
         builder.Services.AddScoped<IProyeccionService, ProyeccionService>();
         // Usar servicio real con base de datos
         builder.Services.AddScoped<IProyeccionContratoService, ProyeccionContratoService>();
+        // Registro del servicio de suscriptores
+        builder.Services.AddScoped<ISuscriptorService, SuscriptorService>();
         // Para usar el servicio simulado en pruebas, descomenta la siguiente línea:
         // builder.Services.AddScoped<IProyeccionContratoService, ProyeccionContratoServiceMock>();
 
