@@ -119,6 +119,201 @@
       overflow-x: auto;
       font-size: 12px;
     }
+
+    /* Estilos para tablas de resultados */
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      background: white;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .result-table th {
+      background: #007cba;
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .result-table td {
+      padding: 12px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .result-table tr:hover {
+      background: #f5f5f5;
+    }
+
+    .result-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .badge.success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .badge.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .badge.info {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    .proyeccion-summary {
+      background: #e8f4fd;
+      padding: 15px;
+      border-radius: 6px;
+      margin: 10px 0;
+      border-left: 4px solid #007cba;
+    }
+
+    .proyeccion-mensual {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+
+    .mes-card {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .mes-card h4 {
+      margin: 0 0 8px 0;
+      color: #007cba;
+    }
+
+    .mes-card .amount {
+      font-size: 18px;
+      font-weight: bold;
+      color: #28a745;
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin: 15px 0;
+    }
+
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .result-table th {
+      background: #007cba;
+      color: white;
+      padding: 12px 15px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .result-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #e9ecef;
+      vertical-align: top;
+    }
+
+    .result-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .result-table tr:nth-child(even) {
+      background: #f8f9fa;
+    }
+
+    .result-table tr:hover {
+      background: #e3f2fd;
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .badge.success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .badge.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .badge.warning {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .proyeccion-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .proyeccion-card {
+      background: white;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .proyeccion-card h4 {
+      margin: 0 0 10px 0;
+      color: #007cba;
+      border-bottom: 2px solid #007cba;
+      padding-bottom: 5px;
+    }
+
+    .proyeccion-mes {
+      display: flex;
+      justify-content: space-between;
+      margin: 5px 0;
+      padding: 5px;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+
+    .json-toggle {
+      background: #6c757d;
+      font-size: 12px;
+      padding: 8px 12px;
+      margin-top: 10px;
+    }
+
+    .json-toggle:hover {
+      background: #545b62;
+    }
   </style>
 </head>
 
@@ -158,11 +353,12 @@
         <button onclick="probarContrato('CTR-2025-001')">CTR-2025-001</button>
         <button onclick="probarContrato('CTR-2025-002')">CTR-2025-002</button>
         <button onclick="probarContrato('CTR-2025-003')">CTR-2025-003</button>
-        <button onclick="probarContrato('CTR-2024-001')">CTR-2024-001</button>
-        <button onclick="probarContrato('CTR-2024-002')">CTR-2024-002</button>
-        <button onclick="probarContrato('CON-2025-001')">CON-2025-001</button>
+        <button onclick="probarContrato('CTR-2025-004')">CTR-2025-004</button>
       </div>
-      <button onclick="probarContrato('INVALIDO-123')" style="background: #f44336;">Probar Contrato Inválido</button>
+      <div style="margin-top: 10px;">
+        <button onclick="probarContrato('INVALIDO-123')" style="background: #f44336;">Probar Contrato Inválido</button>
+        <button onclick="probarContrato('CTR-2025-999')" style="background: #f44336;">CTR-2025-999 (No existe)</button>
+      </div>
     </div>
 
     <div id="resultado" class="result" style="display:none;">
@@ -178,6 +374,19 @@
     window.onload = async function () {
       await verificarConexion();
     };
+
+    // Función para formatear moneda
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN'
+      }).format(amount);
+    }
+
+    // Función para formatear fecha
+    function formatDate(dateString) {
+      return new Date(dateString).toLocaleDateString('es-MX');
+    }
 
     // Verificar que la API esté ejecutándose
     async function verificarConexion() {
@@ -196,17 +405,247 @@
       }
     }
 
-    // Función para mostrar resultados
-    function mostrarResultado(data, esError = false) {
+    // Función para renderizar respuestas de forma visual
+    function renderResponse(data, endpoint) {
       const resultDiv = document.getElementById('resultado');
       const resultText = document.getElementById('resultadoTexto');
 
       resultDiv.style.display = 'block';
-      resultDiv.className = esError ? 'result error' : 'result';
-      resultText.textContent = JSON.stringify(data, null, 2);
+      resultDiv.className = 'result';
+
+      let html = `<h3>📋 Resultado: ${endpoint}</h3>`;
+
+      // Validación de contrato
+      if (endpoint === 'Validar Contrato' && (data.hasOwnProperty('valido') || data.hasOwnProperty('esValido'))) {
+        const esValido = data.valido || data.esValido;
+        const badgeClass = esValido ? 'success' : 'error';
+        const message = esValido ? '✓ Contrato Válido' : '✗ Contrato No Válido';
+
+        html += `
+          <div class="badge ${badgeClass}" style="font-size: 16px; padding: 8px 16px; margin: 10px 0;">${message}</div>
+          ${data.mensaje ? `<p style="margin-top: 10px;"><strong>Mensaje:</strong> ${data.mensaje}</p>` : ''}
+          <div class="table-container" style="margin-top: 15px;">
+            <table class="result-table">
+              <tr><td><strong>Número de Contrato:</strong></td><td>${data.numeroContrato}</td></tr>
+              <tr><td><strong>Estado:</strong></td><td><span class="badge ${badgeClass}">${esValido ? 'Válido' : 'Inválido'}</span></td></tr>
+              <tr><td><strong>Fecha de Validación:</strong></td><td>${formatDate(data.fechaValidacion)}</td></tr>
+            </table>
+          </div>
+        `;
+      }
+      // Proyección individual (formato nuevo)
+      else if (data.hasOwnProperty('proyeccionesMensuales') && data.hasOwnProperty('resumenEjecutivo')) {
+        const proyecciones = data.proyeccionesMensuales;
+        const resumen = data.resumenEjecutivo;
+
+        html += `
+          <div class="proyeccion-summary">
+            <h4>📊 Información del Contrato</h4>
+            <div class="table-container">
+              <table class="result-table">
+                <tr><td><strong>Número de Contrato:</strong></td><td>${data.numeroContrato}</td></tr>
+                <tr><td><strong>Meses Proyectados:</strong></td><td>${data.mesesFuturos} meses</td></tr>
+                <tr><td><strong>Estado:</strong></td><td><span class="badge ${data.exitoso ? 'success' : 'error'}">${data.exitoso ? 'Exitoso' : 'Error'}</span></td></tr>
+                <tr><td><strong>Fecha de Generación:</strong></td><td>${formatDate(data.fechaGeneracion)}</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="proyeccion-summary">
+            <h4>💰 Resumen Ejecutivo</h4>
+            <div class="table-container">
+              <table class="result-table">
+                <tr><td><strong>Pago Mínimo:</strong></td><td>${formatCurrency(resumen.pagoMinimo)}</td></tr>
+                <tr><td><strong>Pago Máximo:</strong></td><td>${formatCurrency(resumen.pagoMaximo)}</td></tr>
+                <tr><td><strong>Pago Promedio:</strong></td><td>${formatCurrency(resumen.pagoPromedio)}</td></tr>
+                <tr><td><strong>Total del Período:</strong></td><td><strong style="color: #007cba;">${formatCurrency(resumen.totalPeriodo)}</strong></td></tr>
+                <tr><td><strong>Ahorros Totales:</strong></td><td><strong style="color: #28a745;">${formatCurrency(resumen.ahorrosTotales)}</strong></td></tr>
+                <tr><td><strong>% de Ahorro:</strong></td><td><span class="badge success">${resumen.porcentajeAhorroTotal.toFixed(2)}%</span></td></tr>
+              </table>
+            </div>
+          </div>
+
+          <h4>📅 Proyecciones Mensuales Detalladas</h4>
+          <div class="proyeccion-grid">
+        `;
+
+        proyecciones.forEach(mes => {
+          const tieneAlertas = mes.tieneAlertas ? '⚠️' : '';
+          const iconoPromo = mes.promocionesActivas !== 'Sin promociones' ? '🎉' : '📋';
+
+          html += `
+            <div class="proyeccion-card" style="${mes.tieneAlertas ? 'border-left: 4px solid #ff9800;' : ''}">
+              <h4>${iconoPromo} ${mes.mesNombre} ${tieneAlertas}</h4>
+              <div class="table-container" style="margin: 0;">
+                <table class="result-table" style="font-size: 12px;">
+                  <tr><td><strong>Subtotal Servicios:</strong></td><td>${formatCurrency(mes.subtotalServicios)}</td></tr>
+                  <tr><td><strong>Descuentos:</strong></td><td style="color: #28a745;">-${formatCurrency(mes.descuentosPromociones)}</td></tr>
+                  <tr><td><strong>Impuestos:</strong></td><td>${formatCurrency(mes.impuestos)}</td></tr>
+                  <tr style="background: #e8f4fd;"><td><strong>Total:</strong></td><td><strong>${formatCurrency(mes.totalProyectado)}</strong></td></tr>
+                </table>
+              </div>
+              <div style="margin-top: 10px; font-size: 11px;">
+                <div><strong>Promociones:</strong> ${mes.promocionesActivas}</div>
+                ${mes.promocionesVencen ? `<div style="color: #ff9800;"><strong>Vencen:</strong> ${mes.promocionesVencen}</div>` : ''}
+                <div style="margin-top: 5px; font-style: italic;">${mes.notas}</div>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div>`;
+
+        html += `
+          <div class="proyeccion-summary">
+            <h4>💡 ${data.mensaje}</h4>
+          </div>
+        `;
+      }
+      // Proyección individual (formato anterior)
+      else if (data.hasOwnProperty('contratoInfo') && data.hasOwnProperty('proyeccionMensual')) {
+        const contratoInfo = data.contratoInfo;
+        const proyecciones = data.proyeccionMensual;
+
+        html += `
+          <div class="proyeccion-summary">
+            <h4>Información del Contrato</h4>
+            <div class="table-container">
+              <table class="result-table">
+                <tr><td><strong>Número de Contrato:</strong></td><td>${contratoInfo.numeroContrato}</td></tr>
+                <tr><td><strong>Cliente:</strong></td><td>${contratoInfo.nombreCliente}</td></tr>
+                <tr><td><strong>Plan:</strong></td><td>${contratoInfo.planServicio}</td></tr>
+                <tr><td><strong>Pago Mensual:</strong></td><td>${formatCurrency(contratoInfo.pagoMensual)}</td></tr>
+                <tr><td><strong>Estado:</strong></td><td><span class="badge ${contratoInfo.estado === 'Activo' ? 'success' : 'warning'}">${contratoInfo.estado}</span></td></tr>
+                <tr><td><strong>Fecha de Inicio:</strong></td><td>${formatDate(contratoInfo.fechaInicio)}</td></tr>
+              </table>
+            </div>
+          </div>
+
+          <h4>Proyección Mensual</h4>
+          <div class="proyeccion-grid">
+        `;
+
+        proyecciones.forEach(mes => {
+          html += `
+            <div class="proyeccion-card">
+              <h4>${mes.mes} ${mes.año}</h4>
+              <div class="proyeccion-mes">
+                <span>Proyectado:</span>
+                <strong style="color: #28a745;">${formatCurrency(mes.montoProyectado)}</strong>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div>`;
+
+        // Calcular total proyectado
+        const totalProyectado = proyecciones.reduce((sum, mes) => sum + mes.montoProyectado, 0);
+        html += `
+          <div class="proyeccion-summary">
+            <h4>💰 Total Proyectado: ${formatCurrency(totalProyectado)}</h4>
+          </div>
+        `;
+      }
+      // Proyecciones múltiples
+      else if (Array.isArray(data.proyecciones)) {
+        const proyecciones = data.proyecciones;
+
+        html += `
+          <h4>Proyecciones Múltiples (${proyecciones.length} contratos procesados)</h4>
+          <div class="table-container">
+            <table class="result-table">
+              <thead>
+                <tr>
+                  <th>Contrato</th>
+                  <th>Cliente</th>
+                  <th>Plan</th>
+                  <th>Pago Mensual</th>
+                  <th>Estado</th>
+                  <th>Total Proyectado</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+
+        let granTotal = 0;
+        proyecciones.forEach(proyeccion => {
+          const contratoInfo = proyeccion.contratoInfo;
+          const totalProyectado = proyeccion.proyeccionMensual.reduce((sum, mes) => sum + mes.montoProyectado, 0);
+          granTotal += totalProyectado;
+
+          html += `
+            <tr>
+              <td>${contratoInfo.numeroContrato}</td>
+              <td>${contratoInfo.nombreCliente}</td>
+              <td>${contratoInfo.planServicio}</td>
+              <td>${formatCurrency(contratoInfo.pagoMensual)}</td>
+              <td><span class="badge ${contratoInfo.estado === 'Activo' ? 'success' : 'warning'}">${contratoInfo.estado}</span></td>
+              <td><strong>${formatCurrency(totalProyectado)}</strong></td>
+            </tr>
+          `;
+        });
+
+        html += `
+              </tbody>
+            </table>
+          </div>
+          <div class="proyeccion-summary">
+            <h4>💰 Gran Total Proyectado: ${formatCurrency(granTotal)}</h4>
+          </div>
+        `;
+      }
+      // Fallback: mostrar JSON con botón toggle
+      else {
+        html += `
+          <button class="json-toggle" onclick="toggleJson()">Ver JSON Completo</button>
+          <div id="jsonContent" style="display: none;">
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          </div>
+        `;
+      }
+
+      html += `<p style="margin-top: 20px; font-size: 12px; color: #666;">
+        <strong>Timestamp:</strong> ${new Date().toLocaleString()}
+      </p>`;
+
+      resultText.innerHTML = html;
 
       // Scroll suave hacia el resultado
       resultDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Función para mostrar errores
+    function mostrarError(error, endpoint) {
+      const resultDiv = document.getElementById('resultado');
+      const resultText = document.getElementById('resultadoTexto');
+
+      resultDiv.style.display = 'block';
+      resultDiv.className = 'result error';
+
+      resultText.innerHTML = `
+        <h3>❌ Error en: ${endpoint}</h3>
+        <div class="badge error" style="font-size: 16px; padding: 8px 16px;">${error}</div>
+        <p style="margin-top: 10px; font-size: 12px; color: #666;">
+          <strong>Timestamp:</strong> ${new Date().toLocaleString()}
+        </p>
+      `;
+
+      resultDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Toggle para mostrar/ocultar JSON
+    function toggleJson() {
+      const jsonContent = document.getElementById('jsonContent');
+      const button = document.querySelector('.json-toggle');
+
+      if (jsonContent.style.display === 'none') {
+        jsonContent.style.display = 'block';
+        button.textContent = 'Ocultar JSON';
+      } else {
+        jsonContent.style.display = 'none';
+        button.textContent = 'Ver JSON Completo';
+      }
     }
 
     // Función para deshabilitar/habilitar botones
@@ -230,17 +669,13 @@
         const data = await response.json();
 
         if (response.ok) {
-          mostrarResultado({
-            ...data,
-            timestamp: new Date().toLocaleString(),
-            endpoint: 'Validar Contrato'
-          });
+          renderResponse(data, 'Validar Contrato');
         } else {
-          mostrarResultado({ error: data.mensaje || 'Error al validar contrato', response: data }, true);
+          mostrarError(data.mensaje || 'Error al validar contrato', 'Validar Contrato');
         }
       } catch (error) {
         console.error('Error:', error);
-        mostrarResultado({ error: 'Error de conexión al validar contrato', details: error.message }, true);
+        mostrarError('Error de conexión al validar contrato', 'Validar Contrato');
       }
       setLoading(false);
     }
@@ -266,17 +701,13 @@
         const data = await response.json();
 
         if (response.ok) {
-          mostrarResultado({
-            ...data,
-            timestamp: new Date().toLocaleString(),
-            endpoint: 'Generar Proyección'
-          });
+          renderResponse(data, 'Generar Proyección');
         } else {
-          mostrarResultado({ error: data.mensaje || 'Error al generar proyección', response: data }, true);
+          mostrarError(data.mensaje || 'Error al generar proyección', 'Generar Proyección');
         }
       } catch (error) {
         console.error('Error:', error);
-        mostrarResultado({ error: 'Error de conexión al generar proyección', details: error.message }, true);
+        mostrarError('Error de conexión al generar proyección', 'Generar Proyección');
       }
       setLoading(false);
     }
@@ -286,7 +717,7 @@
       const solicitudes = [
         { numeroContrato: "CTR-2025-001", mesesFuturos: 3 },
         { numeroContrato: "CTR-2025-002", mesesFuturos: 6 },
-        { numeroContrato: "CON-2025-001", mesesFuturos: 12 }
+        { numeroContrato: "CTR-2025-003", mesesFuturos: 12 }
       ];
 
       setLoading(true);
@@ -302,18 +733,17 @@
         const data = await response.json();
 
         if (response.ok) {
-          mostrarResultado({
+          renderResponse({
             solicitudes_procesadas: solicitudes.length,
             proyecciones: data,
-            timestamp: new Date().toLocaleString(),
-            endpoint: 'Proyecciones Múltiples'
-          });
+            timestamp: new Date().toLocaleString()
+          }, 'Proyecciones Múltiples');
         } else {
-          mostrarResultado({ error: data.mensaje || 'Error al procesar múltiples proyecciones', response: data }, true);
+          mostrarError(data.mensaje || 'Error al procesar múltiples proyecciones', 'Proyecciones Múltiples');
         }
       } catch (error) {
         console.error('Error:', error);
-        mostrarResultado({ error: 'Error de conexión al procesar múltiples proyecciones', details: error.message }, true);
+        mostrarError('Error de conexión al procesar múltiples proyecciones', 'Proyecciones Múltiples');
       }
       setLoading(false);
     }
