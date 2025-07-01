@@ -77,3 +77,41 @@
   line-height: 1.6;
 }
 
+.titulo {
+  text-align: center;
+  margin: 20px;
+  font-size: 24px;
+  color: #003366;
+}
+
+.formulario {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 20px;
+}
+
+.formulario input[type="text"],
+.formulario input[type="number"],
+.formulario input[type="date"],
+.formulario input[type="checkbox"] {
+  padding: 5px;
+  font-size: 14px;
+}
+
+table {
+  width: 95%;
+  margin: auto;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background-color: #f2f2f2;
+}
