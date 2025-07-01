@@ -185,7 +185,7 @@ public class SuscriptorService : ISuscriptorService
       command.Parameters.Add(new SqlParameter("@EstadosAbreviatura", (object?)suscriptor.EstadosAbreviatura ?? DBNull.Value));
       command.Parameters.Add(new SqlParameter("@TipoSuscriptorCodigo", (object?)suscriptor.TipoSuscriptorCodigo ?? DBNull.Value));
 
-      _logger.LogInformation("Parámetros SQL: Nombre={Nombre}, CiudadId={CiudadId}, ColoniaId={ColoniaId}, Correo={Correo}, TipoSuscriptor={TipoSuscriptor}", 
+      _logger.LogInformation("Parámetros SQL: Nombre={Nombre}, CiudadId={CiudadId}, ColoniaId={ColoniaId}, Correo={Correo}, TipoSuscriptor={TipoSuscriptor}",
                            suscriptor.Nombre, suscriptor.CiudadId, suscriptor.ColoniaId, suscriptor.Correo, suscriptor.TipoSuscriptorCodigo);
 
       _logger.LogInformation("Ejecutando query de inserción");
