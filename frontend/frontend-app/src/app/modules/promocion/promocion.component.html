@@ -1,87 +1,87 @@
-<div class="container">
-  <div class="navbar">
-    <div class="nav-left">
-      <a routerLink="/" class="nav-button">Inicio</a>
+  <div class="container">
+    <div class="navbar">
+      <div class="nav-left">
+        <a routerLink="/" class="nav-button">Inicio</a>
+      </div>
+
+      <div class="nav-center">
+        <img src="img/arriba.png" alt="MEGA" class="logo" />
+      </div>
+
+      <div class="nav-right">
+        <span>Configurar Promociones</span>
+      </div>
     </div>
 
-    <div class="nav-center">
-      <img src="img/arriba.png" alt="MEGA" class="logo" />
-    </div>
+    <h2 class="titulo">Gestor de Promociones</h2>
 
-    <div class="nav-right">
-      <span>Configurar Promociones</span>
-    </div>
+  <!-- Formulario para nueva promoción -->
+  <div class="formulario">
+    <input [(ngModel)]="nuevaPromo.nombre" placeholder="Nombre">
+    <input [(ngModel)]="nuevaPromo.descripcion" placeholder="Descripción">
+    <input [(ngModel)]="nuevaPromo.tipo_promocion" placeholder="Tipo">
+    <input [(ngModel)]="nuevaPromo.valor_descuento" type="number" placeholder="Valor">
+    <label>
+      <input type="checkbox" [(ngModel)]="nuevaPromo.es_porcentaje"> %
+    </label>
+    <input [(ngModel)]="nuevaPromo.duracion_meses" type="number" placeholder="Meses">
+    <input [(ngModel)]="nuevaPromo.fecha_inicio" type="date">
+    <input [(ngModel)]="nuevaPromo.fecha_fin" type="date">
+    <label>
+      <input type="checkbox" [(ngModel)]="nuevaPromo.activo"> Activo
+    </label>
+    <button (click)="agregarPromocion()">Agregar</button>
   </div>
 
-  <h2 class="titulo">Gestor de Promociones</h2>
 
-<!-- Formulario para nueva promoción -->
-<div class="formulario">
-  <input [(ngModel)]="nuevaPromo.nombre" placeholder="Nombre">
-  <input [(ngModel)]="nuevaPromo.descripcion" placeholder="Descripción">
-  <input [(ngModel)]="nuevaPromo.tipo_promocion" placeholder="Tipo">
-  <input [(ngModel)]="nuevaPromo.valor_descuento" type="number" placeholder="Valor">
-  <label>
-    <input type="checkbox" [(ngModel)]="nuevaPromo.es_porcentaje"> %
-  </label>
-  <input [(ngModel)]="nuevaPromo.duracion_meses" type="number" placeholder="Meses">
-  <input [(ngModel)]="nuevaPromo.fecha_inicio" type="date">
-  <input [(ngModel)]="nuevaPromo.fecha_fin" type="date">
-  <label>
-    <input type="checkbox" [(ngModel)]="nuevaPromo.activo"> Activo
-  </label>
-  <button (click)="agregarPromocion()">Agregar</button>
-</div>
-
-
-<!-- Tabla de promociones existentes -->
-<table>
-  <thead>
-    <tr>
-      <th>Nombre</th>
-      <th>Descripción</th>
-      <th>Tipo</th>
-      <th>Descuento</th>
-      <th>Duración</th>
-      <th>Inicio</th>
-      <th>Fin</th>
-      <th>Activo</th>
-      <th>Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let promo of promociones">
-      <ng-container *ngIf="editando?.id !== promo.id">
-        <td>{{ promo.nombre }}</td>
-        <td>{{ promo.descripcion }}</td>
-        <td>{{ promo.tipo_promocion }}</td>
-        <td>{{ promo.valor_descuento }}{{ promo.es_porcentaje ? '%' : '$' }}</td>
-        <td>{{ promo.duracion_meses }}</td>
-        <td>{{ promo.fecha_inicio | date }}</td>
-        <td>{{ promo.fecha_fin | date }}</td>
-        <td>{{ promo.activo ? 'Sí' : 'No' }}</td>
-        <td>
-          <button (click)="editarPromocion(promo)">Editar</button>
-          <button (click)="eliminarPromocion(promo.id)">Eliminar</button>
-        </td>
-      </ng-container>
-      <ng-container *ngIf="editando?.id === promo.id">
-        <td><input [(ngModel)]="editando.nombre"></td>
-        <td><input [(ngModel)]="editando.descripcion"></td>
-        <td><input [(ngModel)]="editando.tipo_promocion"></td>
-        <td><input type="number" [(ngModel)]="editando.valor_descuento"></td>
-        <td><input type="number" [(ngModel)]="editando.duracion_meses"></td>
-        <td><input type="date" [(ngModel)]="editando.fecha_inicio"></td>
-        <td><input type="date" [(ngModel)]="editando.fecha_fin"></td>
-        <td>
-          <input type="checkbox" [(ngModel)]="editando.activo">
-        </td>
-        <td>
-          <button (click)="guardarEdicion()">Guardar</button>
-          <button (click)="cancelarEdicion()">Cancelar</button>
-        </td>
-      </ng-container>
-    </tr>
-  </tbody>
-</table>
+  <!-- Tabla de promociones existentes -->
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>Tipo</th>
+        <th>Descuento</th>
+        <th>Duración</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Activo</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let promo of promociones">
+        <ng-container *ngIf="editando?.id !== promo.id">
+          <td>{{ promo.nombre }}</td>
+          <td>{{ promo.descripcion }}</td>
+          <td>{{ promo.tipo_promocion }}</td>
+          <td>{{ promo.valor_descuento }}{{ promo.es_porcentaje ? '%' : '$' }}</td>
+          <td>{{ promo.duracion_meses }}</td>
+          <td>{{ promo.fecha_inicio | date }}</td>
+          <td>{{ promo.fecha_fin | date }}</td>
+          <td>{{ promo.activo ? 'Sí' : 'No' }}</td>
+          <td>
+            <button (click)="editarPromocion(promo)">Editar</button>
+            <button (click)="eliminarPromocion(promo.id)">Eliminar</button>
+          </td>
+        </ng-container>
+        <ng-container *ngIf="editando?.id === promo.id">
+          <td><input [(ngModel)]="editando.nombre"></td>
+          <td><input [(ngModel)]="editando.descripcion"></td>
+          <td><input [(ngModel)]="editando.tipo_promocion"></td>
+          <td><input type="number" [(ngModel)]="editando.valor_descuento"></td>
+          <td><input type="number" [(ngModel)]="editando.duracion_meses"></td>
+          <td><input type="date" [(ngModel)]="editando.fecha_inicio"></td>
+          <td><input type="date" [(ngModel)]="editando.fecha_fin"></td>
+          <td>
+            <input type="checkbox" [(ngModel)]="editando.activo">
+          </td>
+          <td>
+            <button (click)="guardarEdicion()">Guardar</button>
+            <button (click)="cancelarEdicion()">Cancelar</button>
+          </td>
+        </ng-container>
+      </tr>
+    </tbody>
+  </table>
 
