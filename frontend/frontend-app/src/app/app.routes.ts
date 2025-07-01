@@ -14,6 +14,6 @@ export const routes: Routes = [
     {
         path: "promocion",
         loadComponent: () =>
-        import('./modules/promocion/promocion.component').then(i => i.PromocionComponent)
+        import('./modules/promocion/promocion.component').then(i => i.PromocionesComponent)
     }
 ];

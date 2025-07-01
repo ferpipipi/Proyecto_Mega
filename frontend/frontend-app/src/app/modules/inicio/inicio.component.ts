@@ -7,7 +7,7 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './inicio.component.html',
-  styleUrl: './inicio.component.scss'
+  styleUrls: ['./inicio.component.scss'] // ← corregido (plural y en array)
 })
 export class InicioComponent {
 
