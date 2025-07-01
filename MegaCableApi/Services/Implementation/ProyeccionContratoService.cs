@@ -53,38 +53,91 @@ public class ProyeccionContratoService : IProyeccionContratoService
       using var reader = await command.ExecuteReaderAsync();
 
       // Leer proyecciones mensuales (primer ResultSet)
+      var contadorMeses = 0;
       while (await reader.ReadAsync())
       {
-        var proyeccionMensual = new ProyeccionMensualDto
+        contadorMeses++;
+        _logger.LogInformation("Procesando mes {Contador}: {Mes}", contadorMeses, reader["MES"]);
+        
+        try
         {
-          MesNombre = reader["MES"].ToString() ?? "",
-          SubtotalServicios = Convert.ToDecimal(reader["SERVICIOS"]),
-          DescuentosPromociones = Convert.ToDecimal(reader["DESCUENTOS"]),
-          Impuestos = Convert.ToDecimal(reader["IMPUESTOS"]),
-          TotalProyectado = Convert.ToDecimal(reader["TOTAL A PAGAR"]),
-          PromocionesActivas = reader["PROMOCIONES ACTIVAS"].ToString() ?? "",
-          PromocionesVencen = reader["PROMOCIONES QUE VENCEN"].ToString() ?? "",
-          Notas = reader["NOTAS"].ToString() ?? ""
-        };
+          var proyeccionMensual = new ProyeccionMensualDto
+          {
+            MesNombre = reader["MES"].ToString() ?? "",
+            SubtotalServicios = Convert.ToDecimal(reader["PRECIO BASE CONTRATO"]),
+            DescuentosPromociones = Convert.ToDecimal(reader["DESCUENTOS PROMOCIONES"]),
+            Impuestos = 0, // Los impuestos están incluidos en el precio base
+            TotalProyectado = Convert.ToDecimal(reader["TOTAL A PAGAR"]),
+            PromocionesActivas = reader["PROMOCIONES ACTIVAS"].ToString() ?? "",
+            PromocionesVencen = reader["PROMOCIONES QUE VENCEN"].ToString() ?? "",
+            Notas = reader["NOTAS"].ToString() ?? ""
+          };
 
-        // Calcular fecha de proyección basada en el nombre del mes
-        proyeccionMensual.FechaProyeccion = ParsearFechaMes(proyeccionMensual.MesNombre);
+          // Calcular fecha de proyección basada en el nombre del mes
+          proyeccionMensual.FechaProyeccion = ParsearFechaMes(proyeccionMensual.MesNombre);
 
-        proyeccion.ProyeccionesMensuales.Add(proyeccionMensual);
+          proyeccion.ProyeccionesMensuales.Add(proyeccionMensual);
+          _logger.LogInformation("Mes {Mes} procesado exitosamente", proyeccionMensual.MesNombre);
+        }
+        catch (Exception ex)
+        {
+          _logger.LogError(ex, "Error al procesar mes {Contador}", contadorMeses);
+          throw;
+        }
       }
 
+      _logger.LogInformation("Total de meses procesados: {Total}", contadorMeses);
+
       // Leer resumen ejecutivo (segundo ResultSet)
-      if (await reader.NextResultAsync() && await reader.ReadAsync())
+      _logger.LogInformation("Intentando leer segundo ResultSet (resumen ejecutivo)");
+      if (await reader.NextResultAsync())
       {
-        proyeccion.ResumenEjecutivo = new ResumenEjecutivoContratoDto
+        _logger.LogInformation("Segundo ResultSet disponible");
+        if (await reader.ReadAsync())
         {
-          MesesProyectados = Convert.ToInt32(reader["meses_proyectados"]),
-          PagoMinimo = Convert.ToDecimal(reader["pago_minimo"]),
-          PagoMaximo = Convert.ToDecimal(reader["pago_maximo"]),
-          PagoPromedio = Convert.ToDecimal(reader["pago_promedio"]),
-          TotalPeriodo = Convert.ToDecimal(reader["total_6_meses"]),
-          AhorrosTotales = Convert.ToDecimal(reader["ahorros_totales"])
-        };
+          _logger.LogInformation("Leyendo datos del resumen ejecutivo");
+          try
+          {
+            proyeccion.ResumenEjecutivo = new ResumenEjecutivoContratoDto
+            {
+              MesesProyectados = Convert.ToInt32(reader["meses_proyectados"]),
+              PagoMinimo = Convert.ToDecimal(reader["pago_minimo_proyectado"]),
+              PagoMaximo = Convert.ToDecimal(reader["pago_maximo_proyectado"]),
+              PagoPromedio = Convert.ToDecimal(reader["pago_promedio"]),
+              TotalPeriodo = Convert.ToDecimal(reader["total_periodo_completo"]),
+              AhorrosTotales = Convert.ToDecimal(reader["ahorros_totales_promociones"])
+            };
+            _logger.LogInformation("Resumen ejecutivo procesado exitosamente");
+          }
+          catch (Exception ex)
+          {
+            _logger.LogError(ex, "Error al procesar resumen ejecutivo");
+            throw;
+          }
+        }
+        else
+        {
+          _logger.LogWarning("No se pudieron leer datos del segundo ResultSet");
+        }
+      }
+      else
+      {
+        _logger.LogWarning("No se encontró segundo ResultSet");
+      }
+
+      // Opcional: Leer tercer ResultSet (información del contrato) si existe
+      try
+      {
+        if (await reader.NextResultAsync())
+        {
+          _logger.LogInformation("Tercer ResultSet disponible (información del contrato)");
+          // Aquí podríamos leer información adicional del contrato si fuera necesario
+        }
+      }
+      catch (Exception ex)
+      {
+        _logger.LogWarning(ex, "No se pudo leer tercer ResultSet opcional");
+        // No es crítico, continúa
       }
 
       proyeccion.Exitoso = true;
