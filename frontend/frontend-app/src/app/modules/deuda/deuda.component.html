@@ -15,11 +15,11 @@
     <h2>Consulta de Deuda</h2>
     <label for="suscriptor">Suscriptor</label>
       <div class="consulta-deuda-input">
-        <select id="suscriptor" [(ngModel)]="suscriptorSeleccionado">
+        <select id="suscriptor" [(ngModel)]="suscriptorSeleccionadoId">
           <option value="" disabled selected>selecciona...</option>
-          <option *ngFor="let s of suscriptores" [value]="s">{{ s }}</option>
+          <option *ngFor="let s of suscriptores" [value]="s.id">{{ s.nombre }}</option>
         </select>
-        <button (click)="consultarDeuda()" [disabled]="!suscriptorSeleccionado">Consultar</button>
+        <button (click)="consultarDeuda()" [disabled]="!suscriptorSeleccionadoId">Consultar</button>
       </div>
   </div>
 </div>

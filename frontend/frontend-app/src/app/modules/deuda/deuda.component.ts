@@ -14,8 +14,8 @@ import { OnInit } from '@angular/core';
   styleUrl: './deuda.component.scss'
 })
 export class DeudaComponent implements OnInit {
-  suscriptores: string [] = [];
-  suscriptorSeleccionado: string = '';
+  suscriptores: any[] = [];  
+  suscriptorSeleccionadoId: number | null = null;
 
   constructor(private deudaService: DeudaService) {}
 
@@ -25,19 +25,21 @@ export class DeudaComponent implements OnInit {
 
 
   cargarSuscriptores() {
-    //Aquí se conectara el servicio mas adelante
-
-    this.suscriptores = [
-      'Pepe aguirre',
-      'Hugo castro',
-      'Luis Hidalgo',
-      'Miguel Angel'
-    ];
+    this.deudaService.obtenerSuscriptores().subscribe({
+      next: (data: any) => {
+        console.log('Respuesta de la API:', data);
+        this.suscriptores = data.data;  // guardamos todo el array de objetos
+      },
+      error: (error) => {
+        console.error('Error al obtener suscriptores', error);
+      }
+    });
   }
 
   consultarDeuda() {
-  console.log('Consultando deuda para:', this.suscriptorSeleccionado);
-  // Aquí se conectara el servicio mas adelante
+    const suscriptor = this.suscriptores.find(s => s.id === this.suscriptorSeleccionadoId);
+    console.log('Consultando deuda para:', suscriptor);
+    // Aquí puedes acceder a suscriptor.nombre, suscriptor.alias, etc.
   }
 
 }

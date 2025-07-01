@@ -5,30 +5,12 @@ import { HttpClient } from '@angular/common/http';
 
 @Injectable({providedIn: 'root'})
 export class DeudaService {
-    private apiUrl = `${environment.apiURL}/api/Proyeccion`;
+    private apiUrl = `${environment.apiURL}/api`;
 
     constructor(private http: HttpClient) {}
 
-    validarContrato(contratoId: string): Observable<any> {
-        return this.http.get(`${this.apiUrl}/contrato/${contratoId}/validar`);
-    }
-
-    generarProyeccion(contratoId: string, mesesFuturos: number): Observable<any> {
-        return this.http.get(
-        `${this.apiUrl}/contrato/${contratoId}?mesesFuturos=${mesesFuturos}`
-        );
-    }
-
-    generarProyeccionesMultiples(solicitudes: { numeroContrato: string; mesesFuturos: number }[]): Observable<any> {
-        return this.http.post(`${this.apiUrl}/contratos/multiple`, solicitudes);
-    }
-
-    verificarConexion(): Observable<any> {
-        return this.http.get(`${this.apiUrl}/contrato/CTR-2025-001/validar`);
-    }
-
     obtenerSuscriptores(): Observable<string[]> {
-        return this.http.get<string[]>(`${this.apiUrl}/suscriptores`);
+        return this.http.get<string[]>(`${this.apiUrl}/Suscriptores`);
     }
 }
 
