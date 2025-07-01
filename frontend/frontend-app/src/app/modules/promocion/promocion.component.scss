@@ -10,19 +10,35 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 0 1.5rem;
+  height: 60px;
   color: white;
+  background-color: #149BD3;
+  position: relative;
+}
+
+.nav-left,
+.nav-right {
+  width: 200px;
+  display: flex;
+  align-items: center;
 }
 
 .nav-left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+  justify-content: flex-start;
 }
 
-.navbar h2 {
-  margin: 0;
-  font-size: 1.3rem;
+.nav-right {
+  justify-content: flex-end;
+}
+
+.nav-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-button {
@@ -31,10 +47,18 @@
   padding: 0.5rem 1rem;
   border-radius: 4px;
   transition: background-color 0.3s;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  &:visited {
+    color: white;
+  }
 }
 
-.nav-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+.logo {
+  height: 30px;
 }
 
 .content {
@@ -52,3 +76,4 @@
   color: #555;
   line-height: 1.6;
 }
+

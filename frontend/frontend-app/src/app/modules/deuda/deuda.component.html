@@ -1,14 +1,26 @@
 <div class="container">
-    <div class="navbar" style="background-color: #149BD3;">
-        <div class="nav-left">
-            <a routerLink="/" class="nav-button">Inicio</a>
-            <h2>Deuda</h2>
-        </div>
+  <div class="navbar" style="background-color: #149BD3;">
+    <div class="nav-left">
+      <a routerLink="/" class="nav-button">Inicio</a>
     </div>
+    <div class="nav-center">
+      <img src="img/arriba.png" alt="MEGA" class="logo" />
+    </div>
+    <div class="nav-right">
+      <span>Deuda</span>
+    </div>
+  </div>
 
-    <div class="content">
-         <!-- Aqui se debe de plasmar la consulta de la deuda -->
-        <h2>Consulta de Deuda</h2>
-        <p>Formulario y resultados de consulta de deuda irán aquí</p>
-    </div> 
+  <div class="content">
+    <h2>Consulta de Deuda</h2>
+    <label for="suscriptor">Suscriptor</label>
+      <div class="consulta-deuda-input">
+        <select id="suscriptor" [(ngModel)]="suscriptorSeleccionado">
+          <option value="" disabled selected>selecciona...</option>
+          <option *ngFor="let s of suscriptores" [value]="s">{{ s }}</option>
+        </select>
+        <button (click)="consultarDeuda()" [disabled]="!suscriptorSeleccionado">Consultar</button>
+      </div>
+  </div>
 </div>
+

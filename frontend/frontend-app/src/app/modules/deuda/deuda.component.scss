@@ -52,3 +52,93 @@
   color: #555;
   line-height: 1.6;
 }
+
+.nav-center {
+  display: flex;
+  justify-content: center;
+  flex: 1;
+}
+
+.nav-right {
+  color: white;
+}
+
+.logo {
+  width: 120px;
+  height: auto;
+}
+
+
+.content {
+  padding: 1.5rem 2rem;
+  max-width: 700px;
+  margin: 2rem 0rem 2rem 4rem; /* arriba - derecha - abajo - izquierda */
+  background-color: #FEFEFE;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.content h2 {
+  color: #222;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  border-bottom: 2px solid #149BD3;
+  padding-bottom: 0.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+select {
+  width: 100%;
+  padding: 0.6rem;
+  font-size: 0.95rem;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  background-color: #fff;
+  color: #333;
+}
+
+select:focus {
+  border-color: #149BD3;
+  box-shadow: 0 0 0 3px rgba(20, 155, 211, 0.2);
+}
+
+
+.consulta-deuda-input {
+  display: flex;
+  gap: 0.8rem; // espacio entre el select y el botón
+  align-items: center;
+  margin-top: 0.5rem;
+
+  select {
+    flex: 1;
+    min-width: 0; // evita que el flex haga que se desborde
+  }
+
+  button {
+    padding: 0.6rem 1.2rem;
+    background-color: #149BD3;
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background-color 0.3s;
+    white-space: nowrap; // evita que el texto se corte
+  }
+
+  button:hover {
+    background-color: darken(#149BD3, 10%);
+  }
+
+  button:disabled {
+    background-color: #b3dff0;
+    cursor: not-allowed;
+  }
+}
