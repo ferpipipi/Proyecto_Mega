@@ -49,10 +49,12 @@ public class Program
                 c.IncludeXmlComments(xmlPath);
             }
         });
+
+
         // Configure CORS para permitir peticiones desde el frontend
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy("PermitirAngular", builder =>
+            options.AddPolicy("PermitirAngular", policy =>
             {
                     policy.WithOrigins("http://localhost:4200") // Cambia esto por la URL de tu frontend
                     .AllowAnyMethod()
@@ -91,3 +93,4 @@ public class Program
         app.Run();
     }
 }
+
