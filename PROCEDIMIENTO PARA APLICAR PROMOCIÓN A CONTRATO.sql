@@ -135,7 +135,7 @@ EXEC sp_aplicar_promocion_a_contrato
 
 -- Aplicar promoción por código
 EXEC sp_aplicar_promocion_a_contrato
-    @numero_contrato = 'CTR-2025-001',
+    @numero_contrato = 'CTR-2025-002',
     @codigo_promocional = 'NETFLIX20';
 
 -- Aplicar promoción por ID

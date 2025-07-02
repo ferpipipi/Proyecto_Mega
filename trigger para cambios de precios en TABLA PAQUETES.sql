@@ -1,155 +1,84 @@
---  ============================================================================================================
---  TRIGGER PARA CALCULAR AUTOMÁTICAMENTE precio_total EN TABLA PAQUETES:
---  ============================================================================================================
+-- -- ===============================================
+-- -- SP PARA SINCRONIZAR SOLO PRECIOS BASE (SIN DESCUENTO)
+-- -- ===============================================
 
--- ===============================================
--- TRIGGER PARA CÁLCULO AUTOMÁTICO DE PRECIO_TOTAL
--- ===============================================
+-- CREATE OR ALTER PROCEDURE sp_sincronizar_precios_paquetes
+-- AS
+-- BEGIN
+--     BEGIN TRY
+--         PRINT '🔄 Sincronizando precios base de paquetes (sin descuento)...';
+        
+--         -- ⭐ ACTUALIZAR precio_total SOLO CON SUMA DE SERVICIOS (SIN DESCUENTO)
+--         UPDATE p
+--         SET precio_total = totales.suma_servicios_base
+--         FROM paquetes p
+--         INNER JOIN (
+--             SELECT 
+--                 ps.paquete_nombre,
+--                 SUM(ps.precio_unitario * ISNULL(ps.cantidad, 1)) AS suma_servicios_base,
+--                 COUNT(*) AS cantidad_servicios
+--             FROM paquetes_servicios ps
+--             WHERE ps.activo = 1
+--             GROUP BY ps.paquete_nombre
+--         ) totales ON p.nombre = totales.paquete_nombre;
+        
+--         -- Mostrar resultados
+--         SELECT 
+--             'PAQUETES SINCRONIZADOS (PRECIO BASE)' AS resultado,
+--             p.nombre AS paquete,
+--             p.precio_total AS precio_base_actualizado,
+--             p.descuento_porcentaje AS descuento_del_paquete,
+--             p.precio_total * (1 - p.descuento_porcentaje/100) AS precio_final_con_descuento,
+--             COUNT(ps.servicio_nombre) AS servicios_incluidos
+--         FROM paquetes p
+--         INNER JOIN paquetes_servicios ps ON p.nombre = ps.paquete_nombre
+--         WHERE ps.activo = 1
+--         GROUP BY p.id, p.nombre, p.precio_total, p.descuento_porcentaje
+--         ORDER BY p.nombre;
+        
+--         PRINT '✅ Precios base sincronizados (descuento se aplica en contratos)';
+        
+--     END TRY
+--     BEGIN CATCH
+--         PRINT '❌ ERROR en sincronización: ' + ERROR_MESSAGE();
+--     END CATCH
+-- END;
 
-CREATE OR ALTER TRIGGER tr_calcular_precio_total_paquetes
+
+===============================================
+TRIGGER SIMPLE PARA SINCRONIZAR PRECIOS BASE
+===============================================
+
+CREATE OR ALTER TRIGGER tr_sincronizar_precios_base_paquetes
 ON paquetes_servicios
 AFTER INSERT, UPDATE, DELETE
 AS
 BEGIN
     SET NOCOUNT ON;
     
-    -- Declarar tabla temporal para paquetes afectados
+    -- Obtener paquetes afectados
     DECLARE @paquetes_afectados TABLE (paquete_nombre VARCHAR(100));
     
-    -- Obtener nombres de paquetes afectados por INSERT/UPDATE
-    IF EXISTS(SELECT 1 FROM inserted)
-    BEGIN
-        INSERT INTO @paquetes_afectados (paquete_nombre)
-        SELECT DISTINCT paquete_nombre 
-        FROM inserted 
-        WHERE paquete_nombre IS NOT NULL;
-    END
+    INSERT INTO @paquetes_afectados
+    SELECT DISTINCT paquete_nombre FROM inserted WHERE paquete_nombre IS NOT NULL
+    UNION
+    SELECT DISTINCT paquete_nombre FROM deleted WHERE paquete_nombre IS NOT NULL;
     
-    -- Obtener nombres de paquetes afectados por DELETE
-    IF EXISTS(SELECT 1 FROM deleted)
-    BEGIN
-        INSERT INTO @paquetes_afectados (paquete_nombre)
-        SELECT DISTINCT paquete_nombre 
-        FROM deleted 
-        WHERE paquete_nombre IS NOT NULL
-            AND paquete_nombre NOT IN (SELECT paquete_nombre FROM @paquetes_afectados);
-    END
-    
-    -- Actualizar precio_total para cada paquete afectado
+    -- ⭐ ACTUALIZAR SOLO PRECIO BASE (SIN DESCUENTO)
     UPDATE p
-    SET precio_total = ROUND(
-        ISNULL(calc.suma_precio_unitario, 0) * 
-        (1 - ISNULL(p.descuento_porcentaje, 0) / 100.0), 
-        2
-    )
+    SET precio_total = ISNULL(totales.suma_servicios_base, 0)
     FROM paquetes p
-    INNER JOIN @paquetes_afectados pa ON p.nombre = pa.paquete_nombre
-    LEFT JOIN (
+    INNER JOIN (
         SELECT 
             ps.paquete_nombre,
-            SUM(ps.precio_unitario * ps.cantidad) AS suma_precio_unitario
+            SUM(ps.precio_unitario * ISNULL(ps.cantidad, 1)) AS suma_servicios_base
         FROM paquetes_servicios ps
         WHERE ps.activo = 1
+            AND ps.paquete_nombre IN (SELECT paquete_nombre FROM @paquetes_afectados)
         GROUP BY ps.paquete_nombre
-    ) calc ON p.nombre = calc.paquete_nombre;
+    ) totales ON p.nombre = totales.paquete_nombre
+    WHERE p.nombre IN (SELECT paquete_nombre FROM @paquetes_afectados);
     
-    -- Mensaje informativo (opcional - remover en producción)
-    PRINT 'Trigger ejecutado: precio_total actualizado para paquetes afectados';
-    
+    PRINT '🔄 Precios base de paquetes sincronizados (descuento se aplica en contratos)';
 END;
 
---  ============================================================================================================
--- TRIGGER ADICIONAL PARA CAMBIOS EN TABLA PAQUETES:
---  ============================================================================================================
-
--- ===============================================
--- TRIGGER PARA CAMBIOS EN DESCUENTO_PORCENTAJE
--- ===============================================
-
-CREATE OR ALTER TRIGGER tr_recalcular_precio_por_descuento
-ON paquetes
-AFTER UPDATE
-AS
-BEGIN
-    SET NOCOUNT ON;
-    
-    -- Solo ejecutar si cambió descuento_porcentaje
-    IF UPDATE(descuento_porcentaje)
-    BEGIN
-        UPDATE p
-        SET precio_total = ROUND(
-            ISNULL(calc.suma_precio_unitario, 0) * 
-            (1 - ISNULL(p.descuento_porcentaje, 0) / 100.0), 
-            2
-        )
-        FROM paquetes p
-        INNER JOIN inserted i ON p.id = i.id
-        LEFT JOIN (
-            SELECT 
-                ps.paquete_nombre,
-                SUM(ps.precio_unitario * ps.cantidad) AS suma_precio_unitario
-            FROM paquetes_servicios ps
-            WHERE ps.activo = 1
-            GROUP BY ps.paquete_nombre
-        ) calc ON p.nombre = calc.paquete_nombre;
-        
-        PRINT 'Precio recalculado por cambio en descuento_porcentaje';
-    END
-END;
-
-
---  ============================================================================================================
---  VERIFICACIÓN Y PRUEBA DEL TRIGGER:
---  ============================================================================================================
-
--- ===============================================
--- PRUEBAS DEL TRIGGER
--- ===============================================
-
--- Ver estado actual antes de la prueba
-SELECT 
-    'ANTES DE LA PRUEBA:' AS estado,
-    p.nombre AS paquete,
-    ISNULL(calc.suma_servicios, 0) AS suma_servicios,
-    p.descuento_porcentaje AS descuento,
-    p.precio_total AS precio_actual
-FROM paquetes p
-LEFT JOIN (
-    SELECT 
-        ps.paquete_nombre,
-        SUM(ps.precio_unitario * ps.cantidad) AS suma_servicios
-    FROM paquetes_servicios ps
-    WHERE ps.activo = 1
-    GROUP BY ps.paquete_nombre
-) calc ON p.nombre = calc.paquete_nombre
-ORDER BY p.nombre;
-
--- PRUEBA 1: Insertar un nuevo servicio a un paquete
-INSERT INTO paquetes_servicios (
-    paquete_nombre, servicio_nombre, cantidad, precio_unitario, activo
-) VALUES 
-('Dúo Básico', 'Instalación Básica', 1, 199.00, 1);
-
--- PRUEBA 2: Cambiar descuento de un paquete
-UPDATE paquetes 
-SET descuento_porcentaje = 15.0 
-WHERE nombre = 'Dúo Premium';
-
--- Ver resultado después de las pruebas
-SELECT 
-    'DESPUÉS DE LA PRUEBA:' AS estado,
-    p.nombre AS paquete,
-    ISNULL(calc.suma_servicios, 0) AS suma_servicios,
-    p.descuento_porcentaje AS descuento,
-    p.precio_total AS precio_actualizado,
-    ROUND(ISNULL(calc.suma_servicios, 0) * (1 - p.descuento_porcentaje/100), 2) AS precio_esperado
-FROM paquetes p
-LEFT JOIN (
-    SELECT 
-        ps.paquete_nombre,
-        SUM(ps.precio_unitario * ps.cantidad) AS suma_servicios
-    FROM paquetes_servicios ps
-    WHERE ps.activo = 1
-    GROUP BY ps.paquete_nombre
-) calc ON p.nombre = calc.paquete_nombre
-ORDER BY p.nombre;
