@@ -105,3 +105,16 @@ $RECYCLE.BIN/
 
 # Temporary files
 test_multiple.json
+
+# Angular specific
+frontend/.angular/
+frontend/node_modules/
+frontend/dist/
+frontend/.nyc_output/
+frontend/coverage/
+
+# Angular cache and build files
+*.cache
+.angular/cache/
+.angular/
+angular-cache/
