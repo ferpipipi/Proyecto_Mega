@@ -1,0 +1,271 @@
+<div class="proyecciones-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>🚀 MegaCable API</h1>
+    <p>Proyecciones de Contratos</p>
+  </div>
+
+  <!-- Estado de conexión -->
+  <div [class]="estadoConexion.clase">
+    {{ estadoConexion.mensaje }}
+  </div>
+
+  <!-- Validar Contrato -->
+  <div class="section">
+    <h2>🔍 Validar Contrato</h2>
+    <form [formGroup]="formValidacion" (ngSubmit)="validarContrato()">
+      <div class="form-row">
+        <input type="text" formControlName="numeroContrato" placeholder="Ej: CTR-2025-001" class="form-input">
+        <button type="submit" [disabled]="cargando || formValidacion.invalid" class="btn btn-primary">
+          {{ cargando ? 'Validando...' : 'Validar Contrato' }}
+        </button>
+      </div>
+
+      <!-- Error de validación -->
+      <div *ngIf="errorValidacion" class="error-message">
+        {{ errorValidacion }}
+      </div>
+
+      <!-- Resultado de validación -->
+      <div *ngIf="resultadoValidacion" class="result-card">
+        <h3>📋 Resultado de Validación</h3>
+
+        <div class="validation-badge" [class.success]="esContratoValido(resultadoValidacion)"
+          [class.error]="!esContratoValido(resultadoValidacion)">
+          {{ esContratoValido(resultadoValidacion) ? '✓ Contrato Válido' : '✗ Contrato No Válido' }}
+        </div>
+
+        <div class="result-table">
+          <div class="table-row">
+            <span class="label">Número de Contrato:</span>
+            <span class="value">{{ resultadoValidacion.numeroContrato }}</span>
+          </div>
+          <div class="table-row">
+            <span class="label">Estado:</span>
+            <span class="value">
+              <span class="badge" [class.success]="esContratoValido(resultadoValidacion)"
+                [class.error]="!esContratoValido(resultadoValidacion)">
+                {{ esContratoValido(resultadoValidacion) ? 'Válido' : 'Inválido' }}
+              </span>
+            </span>
+          </div>
+          <div class="table-row">
+            <span class="label">Fecha de Validación:</span>
+            <span class="value">{{ formatDate(resultadoValidacion.fechaValidacion) }}</span>
+          </div>
+          <div *ngIf="resultadoValidacion.mensaje" class="table-row">
+            <span class="label">Mensaje:</span>
+            <span class="value">{{ resultadoValidacion.mensaje }}</span>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Generar Proyección -->
+  <div class="section">
+    <h2>📊 Generar Proyección de Contrato</h2>
+    <form [formGroup]="formProyeccion" (ngSubmit)="generarProyeccion()">
+      <div class="form-row">
+        <input type="text" formControlName="numeroContrato" placeholder="Ej: CTR-2025-001" class="form-input">
+        <input type="number" formControlName="mesesFuturos" placeholder="Meses" min="1" max="24" class="form-input">
+        <button type="submit" [disabled]="cargando || formProyeccion.invalid" class="btn btn-primary">
+          {{ cargando ? 'Generando...' : 'Generar Proyección' }}
+        </button>
+      </div>
+
+      <!-- Error de proyección -->
+      <div *ngIf="errorProyeccion" class="error-message">
+        {{ errorProyeccion }}
+      </div>
+
+      <!-- Resultado de proyección -->
+      <div *ngIf="resultadoProyeccion" class="result-card">
+        <h3>📊 Proyección de Contrato</h3>
+
+        <!-- Información del contrato -->
+        <div class="proyeccion-summary">
+          <h4>📋 Información del Contrato</h4>
+          <div class="result-table">
+            <div class="table-row">
+              <span class="label">Número de Contrato:</span>
+              <span class="value">{{ resultadoProyeccion.numeroContrato }}</span>
+            </div>
+            <div class="table-row">
+              <span class="label">Meses Proyectados:</span>
+              <span class="value">{{ resultadoProyeccion.mesesFuturos }} meses</span>
+            </div>
+            <div class="table-row">
+              <span class="label">Estado:</span>
+              <span class="value">
+                <span class="badge" [class.success]="resultadoProyeccion.exitoso"
+                  [class.error]="!resultadoProyeccion.exitoso">
+                  {{ resultadoProyeccion.exitoso ? 'Exitoso' : 'Error' }}
+                </span>
+              </span>
+            </div>
+            <div class="table-row">
+              <span class="label">Fecha de Generación:</span>
+              <span class="value">{{ formatDate(resultadoProyeccion.fechaGeneracion) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resumen ejecutivo -->
+        <div *ngIf="resultadoProyeccion.resumenEjecutivo" class="proyeccion-summary">
+          <h4>💰 Resumen Ejecutivo</h4>
+          <div class="result-table">
+            <div class="table-row">
+              <span class="label">Pago Mínimo:</span>
+              <span class="value">{{ formatCurrency(resultadoProyeccion.resumenEjecutivo.pagoMinimo) }}</span>
+            </div>
+            <div class="table-row">
+              <span class="label">Pago Máximo:</span>
+              <span class="value">{{ formatCurrency(resultadoProyeccion.resumenEjecutivo.pagoMaximo) }}</span>
+            </div>
+            <div class="table-row">
+              <span class="label">Pago Promedio:</span>
+              <span class="value">{{ formatCurrency(resultadoProyeccion.resumenEjecutivo.pagoPromedio) }}</span>
+            </div>
+            <div class="table-row">
+              <span class="label">Total del Período:</span>
+              <span class="value total">{{ formatCurrency(resultadoProyeccion.resumenEjecutivo.totalPeriodo) }}</span>
+            </div>
+            <div class="table-row">
+              <span class="label">Ahorros Totales:</span>
+              <span class="value savings">{{ formatCurrency(resultadoProyeccion.resumenEjecutivo.ahorrosTotales)
+                }}</span>
+            </div>
+            <div class="table-row">
+              <span class="label">% de Ahorro:</span>
+              <span class="value">
+                <span class="badge success">{{ resultadoProyeccion.resumenEjecutivo.porcentajeAhorroTotal.toFixed(2)
+                  }}%</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Proyecciones Mensuales Detalladas -->
+        <div *ngIf="resultadoProyeccion.proyeccionesMensuales && resultadoProyeccion.proyeccionesMensuales.length"
+          class="proyeccion-summary">
+          <h4>📅 Proyecciones Mensuales Detalladas</h4>
+
+          <div class="proyeccion-grid">
+            <div *ngFor="let mes of resultadoProyeccion.proyeccionesMensuales" class="proyeccion-card"
+              [class.alert-card]="mes.tieneAlertas">
+              <h4>
+                <span>{{ mes.promocionesActivas !== 'Sin promociones' ? '🎉' : '📋' }}</span>
+                {{ mes.mesNombre }}
+                <span *ngIf="mes.tieneAlertas">⚠️</span>
+              </h4>
+
+              <div class="mes-table">
+                <div class="table-row">
+                  <span class="label">Subtotal Servicios:</span>
+                  <span class="value">{{ formatCurrency(mes.subtotalServicios) }}</span>
+                </div>
+                <div class="table-row">
+                  <span class="label">Descuentos:</span>
+                  <span class="value discount">-{{ formatCurrency(mes.descuentosPromociones) }}</span>
+                </div>
+                <div class="table-row">
+                  <span class="label">Impuestos:</span>
+                  <span class="value">{{ formatCurrency(mes.impuestos) }}</span>
+                </div>
+                <div class="table-row total-row">
+                  <span class="label"><strong>Total:</strong></span>
+                  <span class="value"><strong>{{ formatCurrency(mes.totalProyectado) }}</strong></span>
+                </div>
+              </div>
+
+              <div class="mes-details">
+                <div class="detail-item">
+                  <strong>Promociones:</strong> {{ mes.promocionesActivas }}
+                </div>
+                <div *ngIf="mes.promocionesVencen" class="detail-item expiring">
+                  <strong>Vencen:</strong> {{ mes.promocionesVencen }}
+                </div>
+                <div *ngIf="mes.notas" class="detail-item notes">
+                  {{ mes.notas }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mensaje -->
+        <div *ngIf="resultadoProyeccion.mensaje" class="proyeccion-summary">
+          <h4>💡 {{ resultadoProyeccion.mensaje }}</h4>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Proyecciones Múltiples -->
+  <div class="section">
+    <h2>📈 Proyecciones Múltiples</h2>
+    <p>Procesar múltiples contratos de una vez:</p>
+    <button (click)="generarProyeccionesMultiples()" [disabled]="cargando" class="btn btn-primary">
+      {{ cargando ? 'Procesando...' : 'Procesar Múltiples Contratos' }}
+    </button>
+
+    <!-- Error múltiple -->
+    <div *ngIf="errorMultiple" class="error-message">
+      {{ errorMultiple }}
+    </div>
+
+    <!-- Resultados múltiples -->
+    <div *ngIf="resultadosMultiples.length" class="result-card">
+      <h3>📊 Proyecciones Múltiples ({{ resultadosMultiples.length }} contratos procesados)</h3>
+
+      <div class="table-container">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Contrato</th>
+              <th>Meses</th>
+              <th>Estado</th>
+              <th>Total Proyectado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let proyeccion of resultadosMultiples">
+              <td>{{ proyeccion.numeroContrato }}</td>
+              <td>{{ proyeccion.mesesFuturos }} meses</td>
+              <td>
+                <span class="badge" [class.success]="proyeccion.exitoso" [class.error]="!proyeccion.exitoso">
+                  {{ proyeccion.exitoso ? 'Exitoso' : 'Error' }}
+                </span>
+              </td>
+              <td><strong>{{ formatCurrency(calcularTotalProyectado(proyeccion)) }}</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="proyeccion-summary">
+        <h4>💰 Gran Total Proyectado: {{ formatCurrency(calcularGranTotal()) }}</h4>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contratos de Prueba -->
+  <div class="section">
+    <h2>🧪 Contratos de Prueba Disponibles</h2>
+    <div class="test-buttons">
+      <button *ngFor="let contrato of contratosPrueba" (click)="probarContrato(contrato)" [disabled]="cargando"
+        class="btn btn-outline">
+        {{ contrato }}
+      </button>
+    </div>
+    <div class="test-buttons">
+      <button (click)="probarContrato('INVALIDO-123')" [disabled]="cargando" class="btn btn-danger">
+        Probar Contrato Inválido
+      </button>
+      <button (click)="probarContrato('CTR-2025-999')" [disabled]="cargando" class="btn btn-danger">
+        CTR-2025-999 (No existe)
+      </button>
+    </div>
+  </div>
+</div>

@@ -51,4 +51,14 @@ public interface ISuscriptorService
   /// Busca suscriptores por término de búsqueda general
   /// </summary>
   Task<List<SuscriptorDto>> BuscarSuscriptoresAsync(string termino);
+
+  /// <summary>
+  /// Obtiene la lista de tipos de suscriptor válidos
+  /// </summary>
+  Task<string[]> ObtenerTiposSuscriptorValidosAsync();
+
+  /// <summary>
+  /// Obtiene la lista detallada de tipos de suscriptor válidos
+  /// </summary>
+  Task<List<TipoSuscriptorDto>> ObtenerTiposSuscriptorDetalladosAsync();
 }

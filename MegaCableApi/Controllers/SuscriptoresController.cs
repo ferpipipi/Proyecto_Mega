@@ -23,51 +23,80 @@ public class SuscriptoresController : ControllerBase
   }
 
   /// <summary>
-  /// Obtiene estadísticas de suscriptores
+  /// Obtiene una lista paginada de suscriptores con filtros opcionales
   /// </summary>
-  /// <returns>Estadísticas de suscriptores</returns>
-  [HttpGet("estadisticas")]
-  public async Task<ActionResult<EstadisticasSuscriptoresDto>> ObtenerEstadisticas()
-  {
-    try
-    {
-      var estadisticas = await _suscriptorService.ObtenerEstadisticasAsync();
-      return Ok(estadisticas);
-    }
-    catch (Exception ex)
-    {
-      _logger.LogError(ex, "Error al obtener estadísticas");
-      return StatusCode(500, "Error interno del servidor");
-    }
-  }
-
-  /// <summary>
-  /// Obtiene todos los suscriptores con filtros y paginación
-  /// </summary>
-  /// <param name="nombre">Filtro por nombre</param>
-  /// <param name="correo">Filtro por correo</param>
-  /// <param name="pagina">Página actual (default: 1)</param>
-  /// <param name="tamanoPagina">Tamaño de página (default: 10)</param>
+  /// <param name="filtros">Filtros de búsqueda y paginación</param>
   /// <returns>Lista paginada de suscriptores</returns>
   [HttpGet]
   public async Task<ActionResult<RespuestaPaginadaSuscriptoresDto>> ObtenerSuscriptores(
-      [FromQuery] string? nombre = null,
-      [FromQuery] string? correo = null,
-      [FromQuery] int pagina = 1,
-      [FromQuery] int tamanoPagina = 10)
+    [FromQuery] string? nombre = null,
+    [FromQuery] string? correo = null,
+    [FromQuery] string? celular = null,
+    [FromQuery] int? ciudadId = null,
+    [FromQuery] int? coloniaId = null,
+    [FromQuery] string? estadosAbreviatura = null,
+    [FromQuery] string? tipoSuscriptorCodigo = null,
+    [FromQuery] int pagina = 1,
+    [FromQuery] int tamanoPagina = 10)
   {
     try
     {
+      // Construir el DTO manualmente para evitar problemas de model binding
       var filtros = new FiltrosSuscriptorDto
       {
         Nombre = nombre,
         Correo = correo,
+        Celular = celular,
+        CiudadId = ciudadId,
+        ColoniaId = coloniaId,
+        EstadosAbreviatura = estadosAbreviatura,
+        TipoSuscriptorCodigo = tipoSuscriptorCodigo,
         Pagina = pagina,
         TamanoPagina = tamanoPagina
       };
 
+      // Logging para debuggear filtros
+      _logger.LogInformation("=== FILTROS RECIBIDOS (MANUAL) ===");
+      _logger.LogInformation("Nombre: {Nombre}", filtros.Nombre ?? "null");
+      _logger.LogInformation("Correo: {Correo}", filtros.Correo ?? "null");
+      _logger.LogInformation("EstadosAbreviatura: {Estado}", filtros.EstadosAbreviatura ?? "null");
+      _logger.LogInformation("EstadosAbreviatura Length: {Length}", filtros.EstadosAbreviatura?.Length ?? 0);
+      _logger.LogInformation("CiudadId: {CiudadId}", filtros.CiudadId?.ToString() ?? "null");
+      _logger.LogInformation("ColoniaId: {ColoniaId}", filtros.ColoniaId?.ToString() ?? "null");
+      _logger.LogInformation("TipoSuscriptorCodigo: {Tipo}", filtros.TipoSuscriptorCodigo ?? "null");
+      _logger.LogInformation("Pagina: {Pagina}", filtros.Pagina);
+      _logger.LogInformation("TamanoPagina: {TamanoPagina}", filtros.TamanoPagina);
+      _logger.LogInformation("========================");
+
+      if (filtros.TamanoPagina > 100)
+      {
+        return BadRequest("El tamaño de página no puede ser mayor a 100");
+      }
+
+      if (filtros.Pagina < 1)
+      {
+        return BadRequest("La página debe ser mayor a 0");
+      }
+
       var resultado = await _suscriptorService.ObtenerSuscriptoresAsync(filtros);
-      return Ok(resultado);
+
+      // TEMPORAL: Agregar info de debug en la respuesta
+      var respuestaConDebug = new
+      {
+        resultado.Suscriptores,
+        resultado.TotalRegistros,
+        resultado.PaginaActual,
+        resultado.TotalPaginas,
+        resultado.TamanoPagina,
+        DEBUG = new
+        {
+          EstadosAbreviaturaRecibido = estadosAbreviatura ?? "NULL",
+          EstadosAbreviaturaLength = estadosAbreviatura?.Length ?? 0,
+          NombreRecibido = nombre ?? "NULL"
+        }
+      };
+
+      return Ok(respuestaConDebug);
     }
     catch (Exception ex)
     {
@@ -77,10 +106,10 @@ public class SuscriptoresController : ControllerBase
   }
 
   /// <summary>
-  /// Obtiene un suscriptor por su ID
+  /// Obtiene un suscriptor específico por su ID
   /// </summary>
   /// <param name="id">ID del suscriptor</param>
-  /// <returns>Suscriptor encontrado</returns>
+  /// <returns>Datos del suscriptor</returns>
   [HttpGet("{id:int}")]
   public async Task<ActionResult<SuscriptorDto>> ObtenerSuscriptor(int id)
   {
@@ -117,125 +146,74 @@ public class SuscriptoresController : ControllerBase
   {
     try
     {
-      _logger.LogInformation("Iniciando creación de suscriptor: {Nombre}", suscriptor.Nombre);
+      _logger.LogInformation("Iniciando creación de suscriptor: {Nombre}, {Correo}", suscriptor.Nombre, suscriptor.Correo);
 
-      // Validaciones básicas
       if (string.IsNullOrWhiteSpace(suscriptor.Nombre))
       {
+        _logger.LogWarning("Intento de crear suscriptor sin nombre");
         return BadRequest("El nombre es requerido");
       }
 
       if (suscriptor.Nombre.Length > 100)
       {
+        _logger.LogWarning("Intento de crear suscriptor con nombre muy largo: {Longitud}", suscriptor.Nombre.Length);
         return BadRequest("El nombre no puede exceder 100 caracteres");
       }
 
-      // Validar campos obligatorios según la base de datos
-      if (suscriptor.CiudadId == null || suscriptor.CiudadId <= 0)
+      // Validar correo (ahora obligatorio)
+      if (string.IsNullOrWhiteSpace(suscriptor.Correo))
       {
-        return BadRequest("El ID de ciudad es requerido");
+        _logger.LogWarning("Intento de crear suscriptor sin correo");
+        return BadRequest("El correo es requerido");
       }
 
-      if (suscriptor.ColoniaId == null || suscriptor.ColoniaId <= 0)
+      if (suscriptor.Correo.Length > 50)
       {
-        return BadRequest("El ID de colonia es requerido");
+        _logger.LogWarning("Correo muy largo: {Longitud}", suscriptor.Correo.Length);
+        return BadRequest("El correo no puede exceder 50 caracteres");
       }
 
-      // Validar correo si se proporciona
-      if (!string.IsNullOrWhiteSpace(suscriptor.Correo))
+      // Validar ciudad_id y colonia_id (obligatorios)
+      if (suscriptor.CiudadId <= 0)
       {
-        if (!IsValidEmail(suscriptor.Correo))
-        {
-          return BadRequest("El formato del correo electrónico no es válido");
-        }
-
-        if (suscriptor.Correo.Length > 50)
-        {
-          return BadRequest("El correo no puede exceder 50 caracteres");
-        }
-
-        // Verificar que el correo no exista
-        var existeCorreo = await _suscriptorService.ExisteCorreoAsync(suscriptor.Correo);
-        if (existeCorreo)
-        {
-          return Conflict("Ya existe un suscriptor con este correo electrónico");
-        }
+        _logger.LogWarning("Ciudad ID inválido: {CiudadId}", suscriptor.CiudadId);
+        return BadRequest("El ID de ciudad es requerido y debe ser mayor a 0");
       }
 
+      if (suscriptor.ColoniaId <= 0)
+      {
+        _logger.LogWarning("Colonia ID inválido: {ColoniaId}", suscriptor.ColoniaId);
+        return BadRequest("El ID de colonia es requerido y debe ser mayor a 0");
+      }
+
+      // Validar correo
+      _logger.LogInformation("Validando correo: {Correo}", suscriptor.Correo);
+
+      if (!IsValidEmail(suscriptor.Correo))
+      {
+        _logger.LogWarning("Formato de correo inválido: {Correo}", suscriptor.Correo);
+        return BadRequest("El formato del correo electrónico no es válido");
+      }
+
+      // Verificar que el correo no exista
+      _logger.LogInformation("Verificando si el correo ya existe");
+      var existeCorreo = await _suscriptorService.ExisteCorreoAsync(suscriptor.Correo);
+      if (existeCorreo)
+      {
+        _logger.LogWarning("Intento de crear suscriptor con correo duplicado: {Correo}", suscriptor.Correo);
+        return Conflict("Ya existe un suscriptor con este correo electrónico");
+      }
+
+      _logger.LogInformation("Llamando al servicio para crear suscriptor");
       var nuevoSuscriptor = await _suscriptorService.CrearSuscriptorAsync(suscriptor);
+
+      _logger.LogInformation("Suscriptor creado exitosamente con ID: {Id}", nuevoSuscriptor.Id);
       return CreatedAtAction(nameof(ObtenerSuscriptor), new { id = nuevoSuscriptor.Id }, nuevoSuscriptor);
     }
     catch (Exception ex)
     {
       _logger.LogError(ex, "Error al crear suscriptor: {Message}", ex.Message);
-      return StatusCode(500, "Error interno del servidor");
-    }
-  }
-
-  /// <summary>
-  /// Busca suscriptores por término de búsqueda
-  /// </summary>
-  /// <param name="termino">Término a buscar en nombre, alias o correo</param>
-  /// <returns>Primer suscriptor encontrado</returns>
-  [HttpGet("buscar")]
-  public async Task<ActionResult<SuscriptorDto>> BuscarSuscriptor([FromQuery] string termino)
-  {
-    try
-    {
-      if (string.IsNullOrWhiteSpace(termino))
-      {
-        return BadRequest("El término de búsqueda es requerido");
-      }
-
-      var resultado = await _suscriptorService.BuscarSuscriptorAsync(termino);
-
-      if (resultado == null)
-      {
-        return NotFound($"No se encontró ningún suscriptor con el término '{termino}'");
-      }
-
-      return Ok(resultado);
-    }
-    catch (Exception ex)
-    {
-      _logger.LogError(ex, "Error al buscar suscriptor con término {Termino}", termino);
-      return StatusCode(500, "Error interno del servidor");
-    }
-  }
-
-  /// <summary>
-  /// Verifica si un correo electrónico ya existe
-  /// </summary>
-  /// <param name="correo">Correo electrónico a verificar</param>
-  /// <returns>Información sobre la existencia del correo</returns>
-  [HttpGet("verificar-correo")]
-  public async Task<ActionResult<object>> VerificarCorreo([FromQuery] string correo)
-  {
-    try
-    {
-      if (string.IsNullOrWhiteSpace(correo))
-      {
-        return BadRequest("El correo es requerido");
-      }
-
-      if (!IsValidEmail(correo))
-      {
-        return BadRequest("El formato del correo electrónico no es válido");
-      }
-
-      var existe = await _suscriptorService.ExisteCorreoAsync(correo);
-
-      return Ok(new
-      {
-        correo = correo,
-        existe = existe,
-        mensaje = existe ? "El correo ya está registrado" : "El correo está disponible"
-      });
-    }
-    catch (Exception ex)
-    {
-      _logger.LogError(ex, "Error al verificar correo {Correo}", correo);
-      return StatusCode(500, "Error interno del servidor");
+      return StatusCode(500, $"Error interno del servidor: {ex.Message}");
     }
   }
 
@@ -243,7 +221,7 @@ public class SuscriptoresController : ControllerBase
   /// Actualiza un suscriptor existente
   /// </summary>
   /// <param name="id">ID del suscriptor a actualizar</param>
-  /// <param name="suscriptor">Datos a actualizar</param>
+  /// <param name="suscriptor">Datos actualizados del suscriptor</param>
   /// <returns>Suscriptor actualizado</returns>
   [HttpPut("{id:int}")]
   public async Task<ActionResult<SuscriptorDto>> ActualizarSuscriptor(int id, [FromBody] ActualizarSuscriptorDto suscriptor)
@@ -255,23 +233,35 @@ public class SuscriptoresController : ControllerBase
         return BadRequest("El ID debe ser mayor a 0");
       }
 
-      // Validar correo si se está actualizando
+      // Validaciones
+      if (!string.IsNullOrWhiteSpace(suscriptor.Nombre) && suscriptor.Nombre.Length > 255)
+      {
+        return BadRequest("El nombre no puede exceder 255 caracteres");
+      }
+
       if (!string.IsNullOrWhiteSpace(suscriptor.Correo))
       {
         if (!IsValidEmail(suscriptor.Correo))
         {
           return BadRequest("El formato del correo electrónico no es válido");
         }
+
+        // Verificar que el correo no exista en otro suscriptor
+        var existeCorreo = await _suscriptorService.ExisteCorreoAsync(suscriptor.Correo, id);
+        if (existeCorreo)
+        {
+          return Conflict("Ya existe otro suscriptor con este correo electrónico");
+        }
       }
 
-      var resultado = await _suscriptorService.ActualizarSuscriptorAsync(id, suscriptor);
+      var suscriptorActualizado = await _suscriptorService.ActualizarSuscriptorAsync(id, suscriptor);
 
-      if (resultado == null)
+      if (suscriptorActualizado == null)
       {
         return NotFound($"Suscriptor con ID {id} no encontrado");
       }
 
-      return Ok(resultado);
+      return Ok(suscriptorActualizado);
     }
     catch (Exception ex)
     {
@@ -284,9 +274,9 @@ public class SuscriptoresController : ControllerBase
   /// Elimina un suscriptor
   /// </summary>
   /// <param name="id">ID del suscriptor a eliminar</param>
-  /// <returns>Confirmación de eliminación</returns>
+  /// <returns>Resultado de la operación</returns>
   [HttpDelete("{id:int}")]
-  public async Task<ActionResult<object>> EliminarSuscriptor(int id)
+  public async Task<ActionResult> EliminarSuscriptor(int id)
   {
     try
     {
@@ -302,7 +292,7 @@ public class SuscriptoresController : ControllerBase
         return NotFound($"Suscriptor con ID {id} no encontrado");
       }
 
-      return Ok(new { mensaje = "Suscriptor eliminado exitosamente", id = id });
+      return Ok(new { mensaje = "Suscriptor eliminado exitosamente", id });
     }
     catch (Exception ex)
     {
@@ -312,7 +302,99 @@ public class SuscriptoresController : ControllerBase
   }
 
   /// <summary>
-  /// Endpoint temporal para diagnóstico
+  /// Busca suscriptores por término general
+  /// </summary>
+  /// <param name="termino">Término de búsqueda</param>
+  /// <returns>Lista de suscriptores que coinciden con el término</returns>
+  [HttpGet("buscar")]
+  public async Task<ActionResult<List<SuscriptorDto>>> BuscarSuscriptores([FromQuery] string termino)
+  {
+    try
+    {
+      if (string.IsNullOrWhiteSpace(termino))
+      {
+        return BadRequest("El término de búsqueda es requerido");
+      }
+
+      if (termino.Length < 2)
+      {
+        return BadRequest("El término de búsqueda debe tener al menos 2 caracteres");
+      }
+
+      var suscriptores = await _suscriptorService.BuscarSuscriptoresAsync(termino);
+      return Ok(suscriptores);
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Error al buscar suscriptores con término {Termino}", termino);
+      return StatusCode(500, "Error interno del servidor");
+    }
+  }
+
+  /// <summary>
+  /// Verifica si un correo electrónico ya existe
+  /// </summary>
+  /// <param name="correo">Correo electrónico a verificar</param>
+  /// <param name="excluirId">ID a excluir de la verificación (opcional)</param>
+  /// <returns>Resultado de la verificación</returns>
+  [HttpGet("verificar-correo")]
+  public async Task<ActionResult<object>> VerificarCorreo([FromQuery] string correo, [FromQuery] int? excluirId = null)
+  {
+    try
+    {
+      if (string.IsNullOrWhiteSpace(correo))
+      {
+        return BadRequest("El correo electrónico es requerido");
+      }
+
+      if (!IsValidEmail(correo))
+      {
+        return BadRequest("El formato del correo electrónico no es válido");
+      }
+
+      var existe = await _suscriptorService.ExisteCorreoAsync(correo, excluirId);
+
+      return Ok(new
+      {
+        correo,
+        existe,
+        mensaje = existe ? "El correo ya está registrado" : "El correo está disponible"
+      });
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Error al verificar correo {Correo}", correo);
+      return StatusCode(500, "Error interno del servidor");
+    }
+  }
+
+  /// <summary>
+  /// Obtiene estadísticas básicas de suscriptores
+  /// </summary>
+  /// <returns>Estadísticas de suscriptores</returns>
+  [HttpGet("estadisticas")]
+  public async Task<ActionResult<object>> ObtenerEstadisticas()
+  {
+    try
+    {
+      var filtros = new FiltrosSuscriptorDto { Pagina = 1, TamanoPagina = 1 };
+      var resultado = await _suscriptorService.ObtenerSuscriptoresAsync(filtros);
+
+      return Ok(new
+      {
+        totalSuscriptores = resultado.TotalRegistros,
+        fechaConsulta = DateTime.Now
+      });
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Error al obtener estadísticas de suscriptores");
+      return StatusCode(500, "Error interno del servidor");
+    }
+  }
+
+  /// <summary>
+  /// Endpoint temporal para probar la conexión y diagnóstico
   /// </summary>
   [HttpPost("test-conexion")]
   public async Task<ActionResult> TestConexion([FromBody] CrearSuscriptorDto suscriptor)
@@ -321,52 +403,41 @@ public class SuscriptoresController : ControllerBase
     {
       _logger.LogInformation("=== INICIANDO TEST DE CONEXIÓN ===");
       _logger.LogInformation("Datos recibidos: {Datos}", System.Text.Json.JsonSerializer.Serialize(suscriptor));
-      
+
       // Probar conexión básica
       var stats = await _suscriptorService.ObtenerEstadisticasAsync();
       _logger.LogInformation("Conexión exitosa - Total suscriptores: {Total}", stats.TotalSuscriptores);
-      
-      // Establecer valores por defecto para campos obligatorios si no se proporcionan
-      if (suscriptor.CiudadId == null)
-      {
-        suscriptor.CiudadId = 121; // Valor por defecto
-        _logger.LogInformation("CiudadId no proporcionado, usando valor por defecto: 121");
-      }
-      
-      if (suscriptor.ColoniaId == null)
-      {
-        suscriptor.ColoniaId = 1; // Valor por defecto
-        _logger.LogInformation("ColoniaId no proporcionado, usando valor por defecto: 1");
-      }
-      
+
       // Probar verificación de correo
       if (!string.IsNullOrWhiteSpace(suscriptor.Correo))
       {
         var existeCorreo = await _suscriptorService.ExisteCorreoAsync(suscriptor.Correo);
         _logger.LogInformation("Verificación de correo '{Correo}': {Existe}", suscriptor.Correo, existeCorreo);
-        
+
         if (existeCorreo)
         {
           return Ok(new { mensaje = "Correo ya existe", correo = suscriptor.Correo });
         }
       }
-      
+
       // Si llegamos aquí, intentar crear el suscriptor
       _logger.LogInformation("Intentando crear suscriptor...");
       var resultado = await _suscriptorService.CrearSuscriptorAsync(suscriptor);
       _logger.LogInformation("Suscriptor creado exitosamente con ID: {Id}", resultado.Id);
-      
-      return Ok(new { 
+
+      return Ok(new
+      {
         mensaje = "Suscriptor creado exitosamente",
-        suscriptor = resultado 
+        suscriptor = resultado
       });
     }
     catch (Exception ex)
     {
       _logger.LogError(ex, "Error en test de conexión: {Message}", ex.Message);
       _logger.LogError("Stack trace: {StackTrace}", ex.StackTrace);
-      
-      return Ok(new { 
+
+      return Ok(new
+      {
         error = ex.Message,
         tipo = ex.GetType().Name,
         stackTrace = ex.StackTrace
@@ -375,8 +446,118 @@ public class SuscriptoresController : ControllerBase
   }
 
   /// <summary>
-  /// Valida el formato de un correo electrónico
+  /// Endpoint básico de prueba para diagnosticar problemas
   /// </summary>
+  [HttpGet("test-basico")]
+  public ActionResult TestBasico()
+  {
+    try
+    {
+      _logger.LogInformation("=== TEST BÁSICO INICIADO ===");
+
+      return Ok(new
+      {
+        mensaje = "Endpoint básico funcionando",
+        timestamp = DateTime.Now,
+        controladorActivo = true
+      });
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Error en test básico: {Message}", ex.Message);
+      return Ok(new
+      {
+        error = ex.Message,
+        tipo = ex.GetType().Name,
+        timestamp = DateTime.Now
+      });
+    }
+  }
+
+  /// <summary>
+  /// Método de debug para ver qué parámetros se están recibiendo
+  /// </summary>
+  [HttpGet("debug-filtros")]
+  public ActionResult<object> DebugFiltros([FromQuery] FiltrosSuscriptorDto filtros)
+  {
+    return Ok(new
+    {
+      Recibido = new
+      {
+        Nombre = filtros.Nombre ?? "NULL",
+        Correo = filtros.Correo ?? "NULL",
+        Celular = filtros.Celular ?? "NULL",
+        EstadosAbreviatura = filtros.EstadosAbreviatura ?? "NULL",
+        EstadosAbreviaturaEsNull = filtros.EstadosAbreviatura == null,
+        EstadosAbreviaturaEsVacio = string.IsNullOrWhiteSpace(filtros.EstadosAbreviatura),
+        CiudadId = filtros.CiudadId?.ToString() ?? "NULL",
+        ColoniaId = filtros.ColoniaId?.ToString() ?? "NULL",
+        TipoSuscriptorCodigo = filtros.TipoSuscriptorCodigo ?? "NULL",
+        Pagina = filtros.Pagina,
+        TamanoPagina = filtros.TamanoPagina
+      }
+    });
+  }
+
+  /// <summary>
+  /// Obtiene la lista de tipos de suscriptor válidos
+  /// </summary>
+  /// <returns>Lista de tipos de suscriptor válidos</returns>
+  [HttpGet("tipos-validos")]
+  public async Task<ActionResult<string[]>> ObtenerTiposSuscriptorValidos()
+  {
+    try
+    {
+      var tipos = await _suscriptorService.ObtenerTiposSuscriptorValidosAsync();
+      return Ok(tipos);
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Error al obtener tipos de suscriptor válidos");
+      return StatusCode(500, "Error interno del servidor");
+    }
+  }
+
+  /// <summary>
+  /// Obtiene la lista detallada de tipos de suscriptor válidos
+  /// </summary>
+  /// <returns>Lista detallada de tipos de suscriptor</returns>
+  [HttpGet("tipos-detallados")]
+  public async Task<ActionResult<List<TipoSuscriptorDto>>> ObtenerTiposSuscriptorDetallados()
+  {
+    try
+    {
+      var tipos = await _suscriptorService.ObtenerTiposSuscriptorDetalladosAsync();
+      return Ok(tipos);
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Error al obtener tipos de suscriptor detallados");
+      return StatusCode(500, "Error interno del servidor");
+    }
+  }
+
+  /// <summary>
+  /// ENDPOINT TEMPORAL - Debug parámetros de filtro
+  /// </summary>
+  [HttpGet("debug")]
+  public ActionResult<object> DebugParametros([FromQuery] FiltrosSuscriptorDto filtros)
+  {
+    return Ok(new
+    {
+      EstadosAbreviatura = filtros.EstadosAbreviatura ?? "NULL",
+      EstadosAbreviaturaLength = filtros.EstadosAbreviatura?.Length ?? 0,
+      Nombre = filtros.Nombre ?? "NULL",
+      Correo = filtros.Correo ?? "NULL",
+      Celular = filtros.Celular ?? "NULL",
+      CiudadId = filtros.CiudadId?.ToString() ?? "NULL",
+      ColoniaId = filtros.ColoniaId?.ToString() ?? "NULL",
+      TipoSuscriptorCodigo = filtros.TipoSuscriptorCodigo ?? "NULL",
+      Pagina = filtros.Pagina,
+      TamanoPagina = filtros.TamanoPagina
+    });
+  }
+
   private static bool IsValidEmail(string email)
   {
     try

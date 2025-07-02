@@ -61,10 +61,24 @@ public class SuscriptorService : ISuscriptorService
         parameters.Add(new SqlParameter("@ColoniaId", filtros.ColoniaId.Value));
       }
 
+      _logger.LogInformation("🔍 SERVICIO DEBUG: EstadosAbreviatura = '{Valor}', IsNull = {IsNull}, IsWhiteSpace = {IsWhiteSpace}",
+        filtros.EstadosAbreviatura ?? "NULL",
+        filtros.EstadosAbreviatura == null,
+        string.IsNullOrWhiteSpace(filtros.EstadosAbreviatura));
+
       if (!string.IsNullOrWhiteSpace(filtros.EstadosAbreviatura))
       {
-        whereConditions.Add("estados_abreviatura = @EstadosAbreviatura");
-        parameters.Add(new SqlParameter("@EstadosAbreviatura", filtros.EstadosAbreviatura));
+        _logger.LogInformation("✅ SERVICIO: Aplicando filtro por estado: '{Estado}' (Length: {Length})",
+          filtros.EstadosAbreviatura, filtros.EstadosAbreviatura.Length);
+        // Usar TRIM para manejar espacios en campos CHAR y comparación exacta
+        whereConditions.Add("TRIM(estados_abreviatura) = @EstadosAbreviatura");
+        parameters.Add(new SqlParameter("@EstadosAbreviatura", filtros.EstadosAbreviatura.Trim().ToUpper()));
+        _logger.LogInformation("✅ SERVICIO: Parámetro agregado - @EstadosAbreviatura = '{Valor}' (con TRIM)", filtros.EstadosAbreviatura.Trim().ToUpper());
+      }
+      else
+      {
+        _logger.LogInformation("❌ SERVICIO: No se aplica filtro por estado (valor null o vacío). Valor recibido: '{Valor}'",
+          filtros.EstadosAbreviatura ?? "NULL");
       }
 
       if (!string.IsNullOrWhiteSpace(filtros.TipoSuscriptorCodigo))
@@ -75,8 +89,16 @@ public class SuscriptorService : ISuscriptorService
 
       var whereClause = whereConditions.Any() ? "WHERE " + string.Join(" AND ", whereConditions) : "";
 
+      _logger.LogInformation("SERVICIO: Consulta SQL construida - WHERE clause: '{WhereClause}'", whereClause);
+      _logger.LogInformation("SERVICIO: Total de parámetros: {TotalParametros}", parameters.Count);
+      foreach (var param in parameters)
+      {
+        _logger.LogInformation("SERVICIO: Parámetro - {Nombre} = '{Valor}'", param.ParameterName, param.Value);
+      }
+
       // Query para contar total de registros
       var countQuery = $"SELECT COUNT(*) FROM suscriptores {whereClause}";
+      _logger.LogInformation("SERVICIO: Query de conteo: {CountQuery}", countQuery);
       var countCommand = new SqlCommand(countQuery, connection);
       countCommand.Parameters.AddRange(parameters.ToArray());
       var countResult = await countCommand.ExecuteScalarAsync();
@@ -162,6 +184,9 @@ public class SuscriptorService : ISuscriptorService
     {
       _logger.LogInformation("Iniciando creación de suscriptor: {Nombre}", suscriptor.Nombre);
 
+      // Validar tipo de suscriptor
+      ValidarTipoSuscriptor(suscriptor.TipoSuscriptorCodigo);
+
       using var connection = new SqlConnection(_connectionString);
       await connection.OpenAsync();
 
@@ -183,7 +208,9 @@ public class SuscriptorService : ISuscriptorService
       command.Parameters.Add(new SqlParameter("@CiudadId", suscriptor.CiudadId));
       command.Parameters.Add(new SqlParameter("@ColoniaId", suscriptor.ColoniaId));
       command.Parameters.Add(new SqlParameter("@EstadosAbreviatura", (object?)suscriptor.EstadosAbreviatura ?? DBNull.Value));
-      command.Parameters.Add(new SqlParameter("@TipoSuscriptorCodigo", (object?)suscriptor.TipoSuscriptorCodigo ?? DBNull.Value));
+      command.Parameters.Add(new SqlParameter("@TipoSuscriptorCodigo",
+        !string.IsNullOrWhiteSpace(suscriptor.TipoSuscriptorCodigo) ?
+        suscriptor.TipoSuscriptorCodigo.ToUpper() : DBNull.Value));
 
       _logger.LogInformation("Parámetros SQL: Nombre={Nombre}, CiudadId={CiudadId}, ColoniaId={ColoniaId}, Correo={Correo}, TipoSuscriptor={TipoSuscriptor}",
                            suscriptor.Nombre, suscriptor.CiudadId, suscriptor.ColoniaId, suscriptor.Correo, suscriptor.TipoSuscriptorCodigo);
@@ -223,6 +250,9 @@ public class SuscriptorService : ISuscriptorService
   {
     try
     {
+      // Validar tipo de suscriptor si se está actualizando
+      ValidarTipoSuscriptor(suscriptor.TipoSuscriptorCodigo);
+
       using var connection = new SqlConnection(_connectionString);
       await connection.OpenAsync();
 
@@ -275,7 +305,9 @@ public class SuscriptorService : ISuscriptorService
       if (suscriptor.TipoSuscriptorCodigo != null)
       {
         setClauses.Add("tipo_suscriptor_codigo = @TipoSuscriptorCodigo");
-        parameters.Add(new SqlParameter("@TipoSuscriptorCodigo", (object?)suscriptor.TipoSuscriptorCodigo ?? DBNull.Value));
+        parameters.Add(new SqlParameter("@TipoSuscriptorCodigo",
+          !string.IsNullOrWhiteSpace(suscriptor.TipoSuscriptorCodigo) ?
+          suscriptor.TipoSuscriptorCodigo.ToUpper() : DBNull.Value));
       }
 
       if (!setClauses.Any())
@@ -456,6 +488,45 @@ public class SuscriptorService : ISuscriptorService
     }
   }
 
+  /// <summary>
+  /// Obtiene la lista de tipos de suscriptor válidos
+  /// </summary>
+  /// <returns>Lista de tipos de suscriptor válidos</returns>
+  public Task<string[]> ObtenerTiposSuscriptorValidosAsync()
+  {
+    return Task.FromResult(ObtenerTiposSuscriptorValidos());
+  }
+
+  /// <summary>
+  /// Obtiene la lista detallada de tipos de suscriptor válidos
+  /// </summary>
+  /// <returns>Lista detallada de tipos de suscriptor</returns>
+  public Task<List<TipoSuscriptorDto>> ObtenerTiposSuscriptorDetalladosAsync()
+  {
+    var tipos = new List<TipoSuscriptorDto>
+    {
+      new() { Codigo = "RES", Descripcion = "Residencial", Categoria = "Personal", Activo = true },
+      new() { Codigo = "EMP", Descripcion = "Empresa", Categoria = "Comercial", Activo = true },
+      new() { Codigo = "EMPL", Descripcion = "Empleado", Categoria = "Personal", Activo = true },
+      new() { Codigo = "AC", Descripcion = "Asociación Civil", Categoria = "Institucional", Activo = true },
+      new() { Codigo = "GOB", Descripcion = "Gobierno", Categoria = "Institucional", Activo = true },
+      new() { Codigo = "ESC", Descripcion = "Escuela", Categoria = "Educativo", Activo = true },
+      new() { Codigo = "CARIDAD", Descripcion = "Caridad", Categoria = "Social", Activo = true },
+      new() { Codigo = "INTERNO", Descripcion = "Interno", Categoria = "Empresa", Activo = true },
+      new() { Codigo = "COMERCIAL", Descripcion = "Comercial", Categoria = "Comercial", Activo = true },
+      new() { Codigo = "INDUSTRIAL", Descripcion = "Industrial", Categoria = "Comercial", Activo = true },
+      new() { Codigo = "PUBLICO", Descripcion = "Sector Público", Categoria = "Institucional", Activo = true },
+      new() { Codigo = "EDUCATIVO", Descripcion = "Educativo", Categoria = "Educativo", Activo = true },
+      new() { Codigo = "SALUD", Descripcion = "Sector Salud", Categoria = "Institucional", Activo = true },
+      new() { Codigo = "ONG", Descripcion = "Organización No Gubernamental", Categoria = "Social", Activo = true },
+      new() { Codigo = "TEMPORAL", Descripcion = "Suscriptor Temporal", Categoria = "Especial", Activo = true },
+      new() { Codigo = "PREMIUM", Descripcion = "Suscriptor Premium", Categoria = "Especial", Activo = true },
+      new() { Codigo = "CORPORATIVO", Descripcion = "Corporativo", Categoria = "Comercial", Activo = true }
+    };
+
+    return Task.FromResult(tipos);
+  }
+
   private static SuscriptorDto MapearSuscriptor(SqlDataReader reader)
   {
     return new SuscriptorDto
@@ -470,5 +541,46 @@ public class SuscriptorService : ISuscriptorService
       EstadosAbreviatura = reader.IsDBNull("estados_abreviatura") ? null : reader.GetString("estados_abreviatura"),
       TipoSuscriptorCodigo = reader.IsDBNull("tipo_suscriptor_codigo") ? null : reader.GetString("tipo_suscriptor_codigo")
     };
+  }
+
+  /// <summary>
+  /// Obtiene los tipos de suscriptor válidos
+  /// </summary>
+  private static string[] ObtenerTiposSuscriptorValidos()
+  {
+    return new[] {
+      "RES",        // Residencial
+      "EMP",        // Empresa
+      "EMPL",       // Empleado
+      "AC",         // Asociación Civil
+      "GOB",        // Gobierno
+      "ESC",        // Escuela
+      "CARIDAD",    // Caridad
+      "INTERNO",    // Interno
+      "COMERCIAL",  // Comercial
+      "INDUSTRIAL", // Industrial
+      "PUBLICO",    // Sector Público
+      "EDUCATIVO",  // Educativo
+      "SALUD",      // Sector Salud
+      "ONG",        // Organización No Gubernamental
+      "TEMPORAL",   // Suscriptor Temporal
+      "PREMIUM",    // Suscriptor Premium
+      "CORPORATIVO" // Corporativo
+    };
+  }
+
+  /// <summary>
+  /// Valida que el tipo de suscriptor sea válido
+  /// </summary>
+  private static void ValidarTipoSuscriptor(string? tipoSuscriptor)
+  {
+    if (!string.IsNullOrWhiteSpace(tipoSuscriptor))
+    {
+      var tiposValidos = ObtenerTiposSuscriptorValidos();
+      if (!tiposValidos.Contains(tipoSuscriptor.ToUpper()))
+      {
+        throw new ArgumentException($"Tipo de suscriptor '{tipoSuscriptor}' no válido. Tipos permitidos: {string.Join(", ", tiposValidos)}");
+      }
+    }
   }
 }

@@ -56,7 +56,10 @@ public class FiltrosSuscriptorDto
   public string? Celular { get; set; }
   public int? CiudadId { get; set; }
   public int? ColoniaId { get; set; }
+
+  [Microsoft.AspNetCore.Mvc.FromQuery(Name = "estadosAbreviatura")]
   public string? EstadosAbreviatura { get; set; }
+
   public string? TipoSuscriptorCodigo { get; set; }
   public int Pagina { get; set; } = 1;
   public int TamanoPagina { get; set; } = 10;
@@ -81,4 +84,15 @@ public class EstadisticasSuscriptoresDto
 {
   public int TotalSuscriptores { get; set; }
   public DateTime FechaConsulta { get; set; }
+}
+
+/// <summary>
+/// DTO para tipos de suscriptor
+/// </summary>
+public class TipoSuscriptorDto
+{
+  public string Codigo { get; set; } = string.Empty;
+  public string Descripcion { get; set; } = string.Empty;
+  public string Categoria { get; set; } = string.Empty;
+  public bool Activo { get; set; } = true;
 }

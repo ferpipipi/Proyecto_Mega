@@ -1,0 +1,77 @@
+/* Estilos globales para MegaCable */
+:root {
+  --megacable-primary: #e74c3c;
+  --megacable-secondary: #34495e;
+  --megacable-success: #27ae60;
+  --megacable-warning: #f39c12;
+  --megacable-danger: #e74c3c;
+  --megacable-light: #ecf0f1;
+  --megacable-dark: #2c3e50;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+}
+
+.navbar-brand {
+  font-weight: bold;
+  color: var(--megacable-primary) !important;
+}
+
+.btn-primary {
+  background-color: var(--megacable-primary);
+  border-color: var(--megacable-primary);
+}
+
+.btn-primary:hover {
+  background-color: #c0392b;
+  border-color: #c0392b;
+}
+
+.card {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.table th {
+  background-color: var(--megacable-light);
+  border-top: none;
+}
+
+.footer {
+  background-color: var(--megacable-dark);
+  color: white;
+  margin-top: auto;
+}
+
+.min-vh-100 {
+  min-height: 100vh;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+}
+
+.error-message {
+  color: var(--megacable-danger);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.success-message {
+  color: var(--megacable-success);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Animaciones */
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
