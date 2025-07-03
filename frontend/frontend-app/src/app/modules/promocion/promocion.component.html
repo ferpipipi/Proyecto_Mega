@@ -1,87 +1,129 @@
-  <div class="container">
-    <div class="navbar">
-      <div class="nav-left">
-        <a routerLink="/" class="nav-button">Inicio</a>
-      </div>
-
-      <div class="nav-center">
-        <img src="img/arriba.png" alt="MEGA" class="logo" />
-      </div>
-
-      <div class="nav-right">
-        <span>Configurar Promociones</span>
-      </div>
+<div class="container">
+  <div class="navbar">
+    <div class="nav-left">
+      <a routerLink="/" class="nav-button">Inicio</a>
     </div>
 
-    <h2 class="titulo">Gestor de Promociones</h2>
+    <div class="nav-center">
+      <img src="img/arriba.png" alt="MEGA" class="logo" />
+    </div>
 
-  <!-- Formulario para nueva promoción -->
-  <div class="formulario">
-    <input [(ngModel)]="nuevaPromo.nombre" placeholder="Nombre">
-    <input [(ngModel)]="nuevaPromo.descripcion" placeholder="Descripción">
-    <input [(ngModel)]="nuevaPromo.tipo_promocion" placeholder="Tipo">
-    <input [(ngModel)]="nuevaPromo.valor_descuento" type="number" placeholder="Valor">
-    <label>
-      <input type="checkbox" [(ngModel)]="nuevaPromo.es_porcentaje"> %
-    </label>
-    <input [(ngModel)]="nuevaPromo.duracion_meses" type="number" placeholder="Meses">
-    <input [(ngModel)]="nuevaPromo.fecha_inicio" type="date">
-    <input [(ngModel)]="nuevaPromo.fecha_fin" type="date">
-    <label>
-      <input type="checkbox" [(ngModel)]="nuevaPromo.activo"> Activo
-    </label>
-    <button (click)="agregarPromocion()">Agregar</button>
+    <div class="nav-right">
+      <span>Configurar Promociones</span>
+    </div>
+  </div>
+
+  <h2 class="titulo">Promociones</h2>
+
+  <button (click)="mostrarModal = true" class="btn-agregar">Agregar</button>
+
+  <div class="modal" *ngIf="mostrarModal">
+    <div class="modal-content">
+      <h3>Nueva Promoción</h3>
+
+      <div class="form-group">
+        <label>Nombre:</label>
+        <input [(ngModel)]="nuevaPromo.nombre" placeholder="Nombre de la promoción">
+      </div>
+
+      <div class="form-group">
+        <label>Descripción:</label>
+        <textarea [(ngModel)]="nuevaPromo.descripcion" placeholder="Descripción"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Tipo de Promoción:</label>
+        <select [(ngModel)]="nuevaPromo.tipo_promocion">
+          <option disabled selected>Selecciona un tipo</option>
+          <option value="cable">Cable</option>
+          <option value="telefono">Teléfono</option>
+          <option value="television">Televisión</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Valor del Descuento:</label>
+        <input [(ngModel)]="nuevaPromo.valor_descuento" type="number" placeholder="0">
+      </div>
+
+      <div class="form-group inline">
+        <label><input type="checkbox" [(ngModel)]="nuevaPromo.es_porcentaje"> ¿Es porcentaje?</label>
+      </div>
+
+      <div class="form-group">
+        <label>Duración (meses):</label>
+        <select [(ngModel)]="nuevaPromo.duracion_meses">
+          <option *ngFor="let mes of meses" [value]="mes">{{ mes }} mes(es)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Fecha Inicio:</label>
+        <input [(ngModel)]="nuevaPromo.fecha_inicio" type="date">
+      </div>
+
+      <div class="form-group">
+        <label>Fecha Fin:</label>
+        <input [(ngModel)]="nuevaPromo.fecha_fin" type="date">
+      </div>
+
+      <div class="form-group inline">
+        <label><input type="checkbox" [(ngModel)]="nuevaPromo.activo"> Activo</label>
+      </div>
+
+      <div class="form-group">
+        <label>Ciudad:</label>
+        <select [(ngModel)]="nuevaPromo.ciudad_id">
+          <option *ngFor="let ciudad of ciudades" [value]="ciudad.id">{{ ciudad.nombre }}</option>
+          <option value="todas">Todas</option>
+        </select>
+
+        <div class="input-plus">
+          <input [(ngModel)]="ciudadNueva" placeholder="Agregar nueva ciudad">
+          <button (click)="agregarCiudad()">+</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Colonias:</label>
+        <select [(ngModel)]="coloniaSeleccionada" multiple>
+          <option *ngFor="let colonia of colonias" [value]="colonia.id">{{ colonia.nombre }}</option>
+          <option value="todas">Todas</option>
+        </select>
+        <div class="input-plus">
+          <input [(ngModel)]="coloniaNueva" placeholder="Agregar nueva colonia">
+          <button (click)="agregarColonia()">+</button>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button (click)="guardarPromocion()">Guardar</button>
+        <button (click)="cerrarModal()">Cancelar</button>
+      </div>
+    </div>
   </div>
 
 
-  <!-- Tabla de promociones existentes -->
-  <table>
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Descripción</th>
-        <th>Tipo</th>
-        <th>Descuento</th>
-        <th>Duración</th>
-        <th>Inicio</th>
-        <th>Fin</th>
-        <th>Activo</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let promo of promociones">
-        <ng-container *ngIf="editando?.id !== promo.id">
-          <td>{{ promo.nombre }}</td>
-          <td>{{ promo.descripcion }}</td>
-          <td>{{ promo.tipo_promocion }}</td>
-          <td>{{ promo.valor_descuento }}{{ promo.es_porcentaje ? '%' : '$' }}</td>
-          <td>{{ promo.duracion_meses }}</td>
-          <td>{{ promo.fecha_inicio | date }}</td>
-          <td>{{ promo.fecha_fin | date }}</td>
-          <td>{{ promo.activo ? 'Sí' : 'No' }}</td>
-          <td>
-            <button (click)="editarPromocion(promo)">Editar</button>
-            <button (click)="eliminarPromocion(promo.id)">Eliminar</button>
-          </td>
-        </ng-container>
-        <ng-container *ngIf="editando?.id === promo.id">
-          <td><input [(ngModel)]="editando.nombre"></td>
-          <td><input [(ngModel)]="editando.descripcion"></td>
-          <td><input [(ngModel)]="editando.tipo_promocion"></td>
-          <td><input type="number" [(ngModel)]="editando.valor_descuento"></td>
-          <td><input type="number" [(ngModel)]="editando.duracion_meses"></td>
-          <td><input type="date" [(ngModel)]="editando.fecha_inicio"></td>
-          <td><input type="date" [(ngModel)]="editando.fecha_fin"></td>
-          <td>
-            <input type="checkbox" [(ngModel)]="editando.activo">
-          </td>
-          <td>
-            <button (click)="guardarEdicion()">Guardar</button>
-            <button (click)="cancelarEdicion()">Cancelar</button>
-          </td>
-        </ng-container>
-      </tr>
-    </tbody>
-  </table>
 
+  <div class="tarjetas">
+    <div class="tarjeta" *ngFor="let promo of promociones; let i = index" [ngClass]="promo.efecto">
+      <img src="img/arriba.png" class="img-logo" />
+      <h4>{{ promo.nombre }}</h4>
+      <p>{{ promo.descripcion }}</p>
+      <p>Tipo: {{ promo.tipo_promocion }}</p>
+      <p>Descuento: {{ promo.valor_descuento }}{{ promo.es_porcentaje ? '%' : '$' }}</p>
+      <p>Duración: {{ promo.duracion_meses }} mes(es)</p>
+      <p>Inicio: {{ promo.fecha_inicio | date }}</p>
+      <p>Fin: {{ promo.fecha_fin | date }}</p>
+      <p>Activo: {{ promo.activo ? 'Sí' : 'No' }}</p>
+      <p>Ciudad: {{ promo.ciudad }}</p>
+      <p>Colonias: {{ promo.colonias.join(', ') }}</p>
+
+      <div class="acciones">
+        <button (click)="editarPromo(promo)">Editar</button>
+        <button (click)="eliminarPromo(i)">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+</div>
