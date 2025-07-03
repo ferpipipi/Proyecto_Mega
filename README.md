@@ -37,7 +37,7 @@ Desarrollé DTOs personalizados para mantener una estructura de datos coherentes
 
 ### Cynthia:
 
-
+Desde el inicio, participé activamente en el desarrollo del frontend para la gestión de promociones, integrando la interfaz con la API y la base de datos. Para ello, diseñé una nueva tabla dentro de la base de datos la cual facilitara la visualización de los datos almacenados y aseguré que la información mostrada en pantalla reflejara fielmente el contenido de la base de datos. De esta forma, contribuí a mantener la coherencia entre el backend y la experiencia de usuario en el frontend.
 
 ## Descripción del proceso del proyecto:
 Iniciamos el proyecto con la idea de formular primero la parte lógica, para posteriormente comenzar con el diseño.
@@ -47,3 +47,13 @@ Se crearon los endpoints necesarios para realizar la conexión con el frontend, 
 Con los endpoints y la API listos, se comenzó a establecer la conexión con el frontend. Además de la interacción con la barra de navegación, ya es posible realizar las consultas necesarias.
 En el apartado de deuda, se muestra una pantalla donde el usuario puede ingresar un ID para consultar los contratos asociados. Al introducir el ID y realizar la búsqueda, se despliega una pantalla con el desglose del resumen de deuda, servicios contratados y sus respectivos costos.
 
+
+## Descripción de la funcionalidad:
+
+Para verificar la funcionalidad del proyecto corrimos el proyecto con ng serve y dotnet run en conjunto, a partir de ahí podemos apreciar los resultados del trabajo realizado, para así asegurar una excelente navegación.
+
+Primeramente, visualizamos el apartado de inicio donde el usuario puede hacer la selección de Deuda o Configurador de Promociones según sea la preferencia:
+ 
+En el apartado de deudas se muestra un recuadro donde podrá seleccionar el nombre de usuario para realizar la consulta de su deuda:
+ 
+Al realizar la consulta de la deuda se visualiza una pantalla con las promociones que tiene y el descuento que se aplica según sea necesario; da un desglose completo desde el contrato con el que cuenta, los paquetes contratados, la promoción actual o vigente, el descuento que se aplica y la colonia a la que pertenece:
