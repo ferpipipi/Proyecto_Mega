@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MegaCableApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+011e664c23125050222c287278963f916f28b5fa")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+da4f5108a908c0ce93251b9324d56d28750616d2")]
 [assembly: System.Reflection.AssemblyProductAttribute("MegaCableApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MegaCableApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
