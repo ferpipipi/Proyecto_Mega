@@ -37,7 +37,7 @@ Desarrollé DTOs personalizados para mantener una estructura de datos coherentes
 
 ### Cynthia:
 
-Desde el inicio, participé activamente en el desarrollo del frontend para la gestión de promociones, integrando la interfaz con la API y la base de datos. Para ello, diseñé una nueva tabla dentro de la base de datos la cual facilitara la visualización de los datos almacenados y aseguré que la información mostrada en pantalla reflejara fielmente el contenido de la base de datos. De esta forma, contribuí a mantener la coherencia entre el backend y la experiencia de usuario en el frontend.
+Desde el inicio, participé activamente en el desarrollo del frontend para la gestión de promociones, integrando la interfaz con la API y la base de datos. Para ello, diseñé una nueva tabla dentro de la base de datos la cual facilitara la visualización de los datos almacenados y aseguré que la información mostrada en pantalla reflejara fielmente el contenido de la base de datos. Además de á creación las APIs correspondientes al gestor de las Promociones. De esta forma, contribuí a mantener la coherencia entre el backend y la experiencia de usuario en el frontend.
 
 ## Descripción del proceso del proyecto:
 Iniciamos el proyecto con la idea de formular primero la parte lógica, para posteriormente comenzar con el diseño.
