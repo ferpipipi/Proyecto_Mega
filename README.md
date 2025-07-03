@@ -1,201 +1,49 @@
-<<<<<<< HEAD
-# Proyecto_Mega
-=======
-# 📊 MegaCable API - Proyecciones de Contratos
+## Proyecto Mega 
 
-## 🚀 Estado Actual
 
-✅ **API FUNCIONANDO CORRECTAMENTE**
-- Compilación exitosa ✅
-- Servidor ejecutándose en: `http://localhost:5011`
-- Swagger UI disponible en: `http://localhost:5011/swagger`
-- Usando servicio MOCK (simulado) para pruebas 🎭
+### Alitzel Alba Hernández
+### Cynthia Fernanda Diaz Cervantes
+### Iván Dalí García Torres
+### Miguel Gómez Romero
 
-## 🔧 Configuración Actual
+## Descripción de la funcionalidad:
+La funcionalidad actual consta de una tarea principal que fue la que desarrollamos que es el calculo de la deuda del suscriptor,
 
-### Servicios Configurados
-- **IProyeccionContratoService**: Usando implementación `ProyeccionContratoServiceMock`
-- **IProyeccionService**: Implementación para proyecciones generales
-- **Swagger**: Documentación interactiva habilitada en desarrollo
+## Aportaciones y distribución de roles:
+A continuación, se presentan los roles que asumimos cada integrante dentro del proyecto. Es importante mencionar que, desde el primer día, trabajamos de forma colaborativa, comenzando por definir una idea inicial sobre cómo abordar el desarrollo. En nuestro caso, decidimos iniciar con la parte lógica del sistema para posteriormente avanzar hacia el diseño visual.
+En un primer momento, el compañero Miguel generó una base de datos inicial como punto de partida. A partir de esta, el compañero Dalí continuó con el desarrollo de la base de datos final y también participó en la implementación de la API. A lo largo del proceso, todas las etapas contaron con la intervención de los distintos miembros del equipo, ya sea para proponer mejoras, complementar secciones o resolver problemas específicos.
+Un claro ejemplo de este trabajo en conjunto fue la creación de los mockups, donde participaron Miguel, Alitzel y Cynthia. Posteriormente, Alitzel comenzó a implementar la parte del frontend para visualizar cómo se reflejaría la idea del mockup en ejecución. A partir de ahí, Miguel se encargó completamente del desarrollo del frontend en los módulos de deuda y configurador de promociones, además de colaborar en la API y los endpoints correspondientes.
 
-### Base de Datos
-- Actualmente configurada para usar **tempdb** (base de datos temporal)
-- Servicio mock activo para evitar problemas de conexión
-- Para cambiar a base de datos real, ver sección "Cambio a Producción"
+### Dalí:
 
-## 📋 Endpoints Disponibles
+El proyecto MegaCable tuvo como objetivo principal el desarrollo de un sistema integral para la gestión de suscriptores y contratos, implementando una base de datos relacional en SQL Server y una API REST desarrollada en C# con .NET. Además, se utilizaron procedimientos almacenados para automatizar tareas clave relacionadas con la operación de servicios de telecomunicaciones.
+La arquitectura técnica del sistema se basó en una estructura relacional sólida, apoyada por procedimientos almacenados para manejar la lógica de negocio más compleja. El backend fue desarrollado con el patrón de servicios y se integró un sistema de pruebas automatizadas utilizando scripts en PowerShell para validar los endpoints de la API.
+Entre los componentes principales se encuentra la gestión de suscriptores, que incluyó distintos tipos (residencial, empresarial, gobierno, etc.), validaciones automáticas y el procedimiento sp_agregar_suscriptor_final con control de errores. La gestión de contratos permitió la creación automática de contratos con múltiples servicios y promociones, utilizando triggers para recalcular precios al aplicar o quitar descuentos, junto con el procedimiento sp_aplicar_promocion_a_contrato.
+El sistema de promociones incluyó descuentos aplicables por código o ID, tanto porcentuales como fijos, con control de vigencia y uso, además de actualizaciones automáticas de precios mediante triggers. En cuanto a las funcionalidades implementadas, se logró un CRUD completo de suscriptores, gestión dinámica de servicios, aplicación y revocación automática de promociones, una API REST funcional con endpoints completos, y validación de integridad referencial entre tablas.
+Finalmente, el sistema fue probado con scripts automatizados en PowerShell, diagnósticos para errores 500, datos de prueba representativos y validación de las respuestas JSON y códigos HTTP, garantizando así una solución estable y funcional.
 
-### 1. Validar Contrato
-```http
-GET /api/Proyeccion/contrato/{numeroContrato}/validar
-```
+### Miguel:
 
-**Ejemplo:**
-```powershell
-Invoke-RestMethod -Uri "http://localhost:5011/api/Proyeccion/contrato/CTR-2025-001/validar" -Method GET
-```
+Desde la asignación del reto, proyecté la estructura general del proyecto y compartí estas ideas con el equipo, quienes las aceptaron de inmediato. Acordamos iniciar con toda la lógica del sistema y, una vez establecida, avanzar hacia el diseño visual. Con esta cronología clara, diseñé y desarrollé una base de datos inicial que compartí con mis compañeros, sirviendo de referencia para el desarrollo posterior de la lógica de negocio.
 
-**Respuesta:**
-```json
-{
-  "numeroContrato": "CTR-2025-001",
-  "esValido": true,
-  "mensaje": "✅ Contrato válido y activo",
-  "fechaValidacion": "2025-06-28T23:34:22.6554404-06:00"
-}
-```
+Desde el principio, propuse reuniones periódicas para dar seguimiento al avance y asignar tareas. Junto con Alitzel y Cynthia, definimos responsabilidades: yo me encargué del frontend de los módulos de Deuda y Configurador de Promociones. Durante esta fase, trabajamos de forma conjunta y supervisé constantemente los avances para asegurar una correcta integración con la interfaz. Paralelamente, estuve revisando y ajustando tanto la base de datos como el backend, con el fin de brindar apoyo en todas las áreas y acelerar el progreso del equipo.
 
-### 2. Generar Proyección de Contrato
-```http
-GET /api/Proyeccion/contrato/{numeroContrato}?mesesFuturos={meses}
-```
+A pesar de mis habilidades multidisciplinarias, disfruto especialmente el desarrollo frontend, pues es donde mejor me desenvuelvo y donde puedo plasmar con mayor satisfacción las ideas que concebí desde un inicio. Finalmente, asumí la responsabilidad de identificar y resolver los errores técnicos que surgieron a lo largo del proceso.
 
-**Ejemplo:**
-```powershell
-Invoke-RestMethod -Uri "http://localhost:5011/api/Proyeccion/contrato/CTR-2025-001?mesesFuturos=6" -Method GET
-```
+### Alitzel:
 
-**Respuesta:** Objeto completo con proyecciones mensuales y resumen ejecutivo.
+Durante el desarrollo del proyecto, me encargué de liderar la implementación de los endpoints de la API para el módulo de suscriptores y deudass, priorizando primero la lógica y luego el diseño visual. Utilicé ASP.NET Core y SQL Server para construir operaciones CRUD RESTful, para así tener una integración efectiva entre el frontend y la base de datos.
+Desarrollé DTOs personalizados para mantener una estructura de datos coherentes, validar entradas y evitar sobre-posteamiento, esto con el fin de evitar las vulnerabilidades y que a su vez sea consistente. Para un correcto manejo de la base de datos utilice bloques using, consultas parametizadas y control de valores nulos.
 
-### 3. Proyecciones Múltiples
-```http
-POST /api/Proyeccion/contratos/multiple
-```
+### Cynthia:
 
-**Ejemplo:**
-```powershell
-$body = @'
-[
-  {
-    "numeroContrato": "CTR-2025-001",
-    "mesesFuturos": 3
-  },
-  {
-    "numeroContrato": "CTR-2025-002",
-    "mesesFuturos": 6
-  }
-]
-'@
 
-Invoke-RestMethod -Uri "http://localhost:5011/api/Proyeccion/contratos/multiple" -Method POST -Body $body -ContentType "application/json"
-```
 
-## 🎭 Contratos de Prueba (Mock)
+## Descripción del proceso del proyecto:
+Iniciamos el proyecto con la idea de formular primero la parte lógica, para posteriormente comenzar con el diseño.
+Para ello, se creó la base de datos en SQL Server, teniendo como tabla principal Contratos, de la cual se derivan el resto de las tablas, entre ellas: Suscriptores, Tipos_Suscriptores, entre otras.
+Antes de realizar la conexión de la API con el frontend, se diseñó un mockup para visualizar lo que se mostraría al usuario. En este se crearon tres interacciones: la pantalla de inicio con las opciones para consultar la deuda y configurar promociones. Al seleccionar cualquiera de estas opciones desde la barra de navegación, se redirige al espacio correspondiente, y de igual forma es posible regresar al inicio para cambiar de opción.
+Se crearon los endpoints necesarios para realizar la conexión con el frontend, tales como los de suscriptores, deuda y promociones.
+Con los endpoints y la API listos, se comenzó a establecer la conexión con el frontend. Además de la interacción con la barra de navegación, ya es posible realizar las consultas necesarias.
+En el apartado de deuda, se muestra una pantalla donde el usuario puede ingresar un ID para consultar los contratos asociados. Al introducir el ID y realizar la búsqueda, se despliega una pantalla con el desglose del resumen de deuda, servicios contratados y sus respectivos costos.
 
-Los siguientes contratos están configurados como **válidos** en el servicio mock:
-- `CTR-2025-001`
-- `CTR-2025-002`
-- `CTR-2025-003`
-- `CTR-2024-001`
-- `CTR-2024-002`
-- `CON-2025-001`
-
-Cualquier otro número de contrato retornará como **inválido**.
-
-## 📊 Estructura de Respuesta
-
-### ProyeccionContratoDDto
-```json
-{
-  "numeroContrato": "CTR-2025-001",
-  "mesesFuturos": 6,
-  "proyeccionesMensuales": [
-    {
-      "fechaProyeccion": "2025-06-01T00:00:00",
-      "mesNombre": "Junio 2025",
-      "subtotalServicios": 1485.00,
-      "descuentosPromociones": 148.50,
-      "impuestos": 213.84,
-      "totalProyectado": 1550.34,
-      "promocionesActivas": "Descuento Lealtad (-$148.50)",
-      "promocionesVencen": "",
-      "notas": "✅ Con descuentos activos",
-      "tieneAlertas": false,
-      "porcentajeDescuento": 10.00
-    }
-  ],
-  "resumenEjecutivo": {
-    "mesesProyectados": 6,
-    "pagoMinimo": 1092.02,
-    "pagoMaximo": 1550.34,
-    "pagoPromedio": 1307.61,
-    "totalPeriodo": 7845.66,
-    "ahorrosTotales": 751.50,
-    "variacionMaxMin": 458.32,
-    "porcentajeAhorroTotal": 8.74
-  },
-  "fechaGeneracion": "2025-06-28T23:34:42.8629121-06:00",
-  "exitoso": true,
-  "mensaje": "✅ Proyección simulada generada exitosamente para 6 meses"
-}
-```
-
-## 🔄 Cambio a Producción
-
-Para cambiar del servicio mock al servicio real que usa la base de datos:
-
-1. **Actualizar Program.cs:**
-```csharp
-// Comentar esta línea:
-// builder.Services.AddScoped<IProyeccionContratoService, ProyeccionContratoServiceMock>();
-
-// Descomentar esta línea:
-builder.Services.AddScoped<IProyeccionContratoService, ProyeccionContratoService>();
-```
-
-2. **Actualizar appsettings.json:**
-```json
-{
-  "DatabaseConfig": {
-    "ConnectionString": "Server=TU_SERVIDOR;Database=MegaCableDb;Trusted_Connection=true;TrustServerCertificate=true;"
-  }
-}
-```
-
-3. **Recompilar y ejecutar:**
-```powershell
-dotnet build
-dotnet run
-```
-
-## 🛠️ Comandos Útiles
-
-### Compilar
-```powershell
-cd "x:\IVANDALIGARCIA\Escritorio\PLATZI\MEGA_CABLE_CURSOS\MegaCableApi"
-dotnet build
-```
-
-### Ejecutar
-```powershell
-cd "x:\IVANDALIGARCIA\Escritorio\PLATZI\MEGA_CABLE_CURSOS\MegaCableApi\MegaCableApi"
-dotnet run
-```
-
-### Detener procesos bloqueados
-```powershell
-Get-Process -Name "MegaCableApi" -ErrorAction SilentlyContinue | Stop-Process -Force
-```
-
-## 📝 Notas Técnicas
-
-- ✅ Arquitectura limpia implementada con separación de responsabilidades
-- ✅ Inyección de dependencias configurada correctamente
-- ✅ Manejo de errores implementado
-- ✅ Swagger UI para documentación interactiva
-- ✅ Logging configurado
-- ✅ DTOs bien estructurados
-- ✅ Servicios mock para pruebas independientes de BD
-
-## 🎯 Próximos Pasos Recomendados
-
-1. **Configurar la base de datos real** cuando esté disponible
-2. **Agregar autenticación** si es necesario
-3. **Implementar cache** para mejorar rendimiento
-4. **Agregar pruebas unitarias** e integración
-5. **Configurar CI/CD** para despliegues automáticos
-
----
-
-**¡La API está lista para usar! 🚀**
->>>>>>> ApiFull
